@@ -1,0 +1,140 @@
+## SECTION=elrest_custom_install
+
+menuconfig ELREST_CUSTOM_INSTALL
+	bool "Elrest Custom Install          "
+	select KERNEL if ELREST_CUSTOM_ROOT_DIRECTORIES_INSTALL
+#	select BLSPEC_PFC if ELREST_CUSTOM_BLSPEC_DIRECTORIES_INSTALL
+	default n
+	help
+	  Install Elrest custom files to target file system
+
+if ELREST_CUSTOM_INSTALL
+
+config ELREST_CUSTOM_CDS3_LIBS_INSTALL
+	bool
+	default n
+	prompt "installs elrest specific cds3-libs"
+	help
+	  This installs f.e. libCmpSQLite.so
+
+config ELREST_CUSTOM_INIT_FILES_INSTALL
+	bool
+	default n
+	prompt "installs elrest specific init files"
+	help
+	  This installs init files to /etc/init.d and links them to /etc/rc.d.
+
+config ELREST_CUSTOM_PROFILE_FILES_INSTALL
+	bool
+	default n
+	prompt "install /etc/profile.environment to root file system"
+	help
+	  This installs the files /etc/profile and /etc/profile.environment
+	  to root file system.
+
+config ELREST_CUSTOM_TS_CONF_FILES_INSTALL
+	bool
+	default n
+	prompt "install /etc/ts.conf to root file system"
+	help
+	  This installs the files /etc/ts.conf to root file system.
+
+config ELREST_CUSTOM_UDEV_RULES_INSTALL
+	bool
+	default n
+	prompt "install custom, udev rules files"
+	help
+	  This installs elrest custom udev rules to /etc/udev/rules.d.
+    
+#config ELREST_CUSTOM_TIME_LOCALE_CONFIG_INSTALL
+#	bool
+#	default n
+#	prompt "install custom time and locale configs"
+#	help
+#	  This installs elrest custom time and locale configs to /etc.
+
+config ELREST_CUSTOM_XORG_CONFIG_INSTALL
+	bool
+	default n
+	prompt "install custom Xorg config"
+	help
+	  This installs elrest custom Xorg config to /etc, /usr/bin.
+
+config ELREST_CUSTOM_PEKWM_CONFIG_INSTALL
+	bool
+	default n
+	prompt "install custom pekwm configuration"
+	help
+	  This installs elrest custom pekwm configuration to /home and /root.
+
+config ELREST_CUSTOM_FLUXBOX_CONFIG_INSTALL
+	bool
+	default n
+	prompt "install custom fluxbox configuration"
+	help
+	  This installs elrest custom fluxbox configuration to /root.
+
+config ELREST_CUSTOM_ICEWM_CONFIG_INSTALL
+	bool
+	default n
+	prompt "install custom icewm configuration"
+	help
+	  This installs elrest custom icewm configuration.
+
+config ELREST_CUSTOM_WEBKIT_CONFIG_INSTALL
+	bool
+	default n
+	prompt "install webkit configuration"
+	help
+	  This installs webkit java plugin directory to root file system.
+    
+config ELREST_CUSTOM_USER_FILES_INSTALL
+	bool
+	default n
+	prompt "install user specific files"
+	help
+	  This installs user specific files to /home/user.
+    
+config ELREST_CUSTOM_CONFIG_FILES_INSTALL
+	bool
+	default n
+	prompt "install elrest specific files to /etc"
+	help
+	  This installs elrest specific files to /etc.
+    
+config ELREST_CUSTOM_PLCLIST
+	bool
+	default n
+	prompt "install plclist feature "
+
+config ELREST_CUSTOM_WBM
+	bool
+	default n
+	prompt "install index.php in /var/www/wbm"
+
+config ELREST_CUSTOM_PTE_INSTALL
+	bool
+	default n
+	prompt "install elrest specific files for pte "
+
+config ELREST_CUSTOM_TTF_INSTALL
+	bool
+	default n
+	prompt "install ttf fonts f.e. liberation"
+
+config ELREST_CUSTOM_HEADER_FILES_INSTALL
+	bool
+	default n
+	prompt "install elrest specific header files "
+	
+config ELREST_CUSTOM_ROOT_DIRECTORIES_INSTALL
+	bool
+	default n
+	prompt "add directories /log and /settings to root file system"
+
+config ELREST_CUSTOM_U_BOOT_FILES_INSTALL
+	bool
+	default n
+	prompt "add U-Boot files to root file system"
+
+endif

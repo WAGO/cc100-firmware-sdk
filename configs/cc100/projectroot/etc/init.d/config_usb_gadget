@@ -1,0 +1,148 @@
+#!/bin/sh
+
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+#
+# Copyright (c) 2018 WAGO Kontakttechnik GmbH & Co. KG
+
+#
+# config_usb_gadget
+#
+
+#http://www.usb.org/developers/docs/USB_LANGIDs.pdf
+#http://www.baiheee.com/Documents/090518/090518112619/USB_LANGIDs.pdf
+LANGUAGE="strings/0x409"
+BASE="/sys/kernel/config/usb_gadget"
+GADGET="$BASE/eth-gadget"
+configs="configs/default.1"
+MAC=$(/etc/config-tools/get_typelabel_value MAC | tr -d ':')
+
+# GADGET_FUNCTIONS="acm ecm ncm rndis mass_storage"
+GADGET_FUNCTIONS="rndis"
+
+if test -r "/etc/specific/gadget_functions.conf"; then
+  . "/etc/specific/gadget_functions.conf"
+fi
+
+calc_mac()
+{
+  printf "%012X" "$((0x$MAC +$1))" | sed 's/\(..\)/\1:/g; s/:$//'
+}
+
+add_function()
+{
+  curr_function="functions/${1}.0"
+  mkdir -p "$curr_function"
+  rm -f "${configs}/${1}.0"
+  # Ethernet functions will be supplied with our MACs
+  if test -f "${curr_function}/ifname"; then
+    calc_mac "2" > "${curr_function}/host_addr"
+    calc_mac "3" > "${curr_function}/dev_addr"
+  fi
+  # Documentation(stall): Disabled on some USB devices known
+  # not to work correctly. You should set it to true.
+  if test -f "${curr_function}/stall"; then
+    echo "1" > "${curr_function}/stall"
+  fi
+  if test "$1" = rndis; then
+    echo "1" > "${curr_function}/use_ms_rndiscmp"
+  fi
+  ln -fs "$curr_function" "${configs}"
+}
+
+config_base()
+{
+  echo 0x1D6B > idVendor
+  echo 0x0104 > idProduct
+
+  mkdir -p "${configs}/${LANGUAGE}" "$LANGUAGE"
+  echo 250 > "${configs}/MaxPower"
+
+  echo "Default configuration" > "${configs}/${LANGUAGE}/configuration"
+  (
+    cd "$LANGUAGE"
+    echo "$MAC" > serialnumber
+    echo "WAGO Kontakttechnik GmbH & Co. KG" > manufacturer
+    /etc/config-tools/get_typelabel_value SYSDESC > product
+  )
+}
+
+start_stop_gadget()
+{
+  test -d "${GADGET}" && cd "${GADGET}" || return
+  # UDC is either empty or the current UDC
+  test ! -f UDC || read UDC < UDC
+
+  case "$USB:$UDC" in
+    1:)
+	# Enable "USB Device Controller" if not enabled
+	ls /sys/class/udc | head -n1 > UDC
+	;;
+    0:?*)
+	# Disable USB Gadget controller if enabled
+	echo > UDC
+  esac
+}
+
+replug()
+{
+	test -d "${GADGET}" || exit 0
+	cd "${GADGET}"
+	test -z "$(cat UDC)" || echo > UDC
+	sleep 3
+	ls /sys/class/udc | head -n1 > UDC
+}
+
+case "$1" in
+  start)
+	set -e
+	#startup_cc_controller
+	modprobe libcomposite
+	#modprobe extcon-ptn5150
+	if test ! -d "$BASE"; then
+          mount -t configfs none /sys/kernel/config
+	fi
+	if test ! -d "$BASE"; then
+	  echo "configfs not mounted"
+	  exit 1
+	fi
+	mkdir -p "${GADGET}"
+	cd "${GADGET}"
+	test -z "$(cat UDC)" || echo > UDC
+
+	config_base
+
+	for f in $GADGET_FUNCTIONS; do
+	  add_function "$f"
+	done
+	start_stop_gadget
+	replug
+	;;
+  stop)
+	set +e
+	#exec 2>/dev/null
+	test -d "${GADGET}" || exit 0
+	cd "${GADGET}"
+	test -z "$(cat UDC)" || echo > UDC
+	rmdir "${configs}/${LANGUAGE}"
+	rmdir "${LANGUAGE}"
+	for f in functions/*; do
+	  rm -f "${configs}/${f#*/}"
+	  rmdir "${f}"
+	done
+	rmdir configs/*
+	cd ..
+	rmdir "${GADGET}" 2>&1
+	;;
+  replug)
+	replug
+	;;
+  event)
+	start_stop_gadget
+	replug
+	;;
+  *)
+        echo "Usage: $0 (stop | start | replug | event)"
+        ;;
+esac

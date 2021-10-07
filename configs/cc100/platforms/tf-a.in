@@ -1,0 +1,141 @@
+## SECTION=bootloader
+
+menuconfig TF_A
+	select BOOTLOADER
+	select HOST_DTC
+	prompt "ARM Trusted Firmware-A        "
+	depends on ARCH_ARM || ARCH_ARM64
+	bool
+
+if TF_A
+
+config TF_A_VERSION
+	string
+	default "v2.2"
+	prompt "TF-A version"
+	help
+	  Enter the TF-A git commit-ish you want to build. Usually a tagged
+	  release like "v2.2"
+
+config TF_A_MD5
+	string
+	default "bb300e5a62c911e189c80d935d497a4b"
+	prompt "TF-A source md5"
+
+config TF_A_ARCH_STRING
+        string
+        default "aarch32" if ARCH_ARM
+        default "aarch64" if ARCH_ARM64
+
+choice
+	prompt "TF-A Architecture"
+	default TF_A_ARM_ARCH_MAJOR_7 if ARCH_ARM
+	default TF_A_ARM_ARCH_MAJOR_8 if ARCH_ARM64
+	help
+	  Architecture version major number
+
+	config TF_A_ARM_ARCH_MAJOR_7
+		depends on ARCH_ARM
+		prompt "ARMv7"
+		bool
+
+	config TF_A_ARM_ARCH_MAJOR_8_32_BIT
+		depends on ARCH_ARM
+		prompt "ARMv8 32-bit"
+		bool
+
+	config TF_A_ARM_ARCH_MAJOR_8
+		depends on ARCH_ARM64
+		prompt "ARMv8"
+		bool
+
+endchoice
+
+config TF_A_ARM_ARCH_MAJOR
+        int
+        default 7 if TF_A_ARM_ARCH_MAJOR_7
+        default 8 if TF_A_ARM_ARCH_MAJOR_8_32_BIT
+        default 8 if TF_A_ARM_ARCH_MAJOR_8
+
+
+config TF_A_PLATFORMS
+	string
+	prompt "TF-A target platforms"
+	help
+	  A space separated list of TF-A target platforms.
+
+config TF_A_ARM_ARCH_MINOR
+	depends on TF_A_ARM_ARCH_MAJOR_8 || TF_A_ARM_ARCH_MAJOR_8_32_BIT
+	int
+	default 0
+	prompt "TF-A target ARMv8.MINOR version"
+	help
+	  The minor version of the ARMv8 architecture targeted. Defaults to 0.
+
+config TF_A_EXTRA_ARGS
+	string
+	prompt "TF-A extra build arguments"
+	help
+	  Extra platform-specific build arguments to pass to the TF-A build
+	  process, e.g. DTB_FILE_NAME= for the stm32mp1
+
+config TF_A_ARTIFACTS
+	string
+	prompt "TF-A artifact file names"
+	help
+	  A space-separated list of glob patterns of artifacts to copy from the
+	  build directory.
+	  All file names are relative to the appropriate TF-A platform build
+	  directory.
+
+comment "Payloads"
+
+choice
+	prompt "BL32 Payload"
+	default TF_A_BL32_NONE
+	help
+	  payload for BL32 (Secure World OS)
+
+	config TF_A_BL32_NONE
+		prompt "None"
+		bool
+
+	config TF_A_BL32_SP_MIN
+		depends on ARCH_ARM
+		prompt "sp_min"
+		bool
+
+	config TF_A_BL32_TSP
+		depends on ARCH_ARM64
+		prompt "Test Secure Payload"
+		bool
+
+endchoice
+
+if TF_A_BL32_TSP
+choice TF_A_BL32_TSP_RAM_LOCATION
+	prompt "TSP location"
+	default TF_A_BL32_TSP_RAM_LOCATION_TSRAM
+
+	config TF_A_BL32_TSP_RAM_LOCATION_TSRAM
+		prompt "Trusted SRAM"
+		bool
+
+	config TF_A_BL32_TSP_RAM_LOCATION_TDRAM
+		prompt "Trusted DRAM (if available)"
+		bool
+
+	config TF_A_BL32_TSP_RAM_LOCATION_DRAM
+		prompt "Secure DRAM region (configured by TrustZone controller)"
+		bool
+endchoice
+
+config TF_A_BL32_TSP_RAM_LOCATION_STRING
+        string
+        default "tsram" if TF_A_BL32_TSP_RAM_LOCATION_TSRAM
+        default "tdram" if TF_A_BL32_TSP_RAM_LOCATION_TDRAM
+        default "dram"  if TF_A_BL32_TSP_RAM_LOCATION_DRAM
+
+endif
+
+endif

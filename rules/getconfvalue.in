@@ -1,0 +1,9 @@
+## SECTION=elrest_specific_applications
+
+config GETCONFVALUE
+	tristate
+	select LIBMSGTOOL
+	select CONFIG_TOOLS
+	prompt "getconfvalue"
+	help
+	  FIXME

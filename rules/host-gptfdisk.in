@@ -1,0 +1,11 @@
+## SECTION=hosttools_noprompt
+
+config HOST_GPTFDISK
+	tristate
+	select HOST_NCURSES
+	select HOST_LIBUUID
+	select HOST_LIBPOPT
+	select HOST_UTIL_LINUX_NG
+	select LIBPOPT
+	select LIBUUID
+	default y if ALLYES

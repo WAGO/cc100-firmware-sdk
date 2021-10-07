@@ -1,0 +1,15 @@
+## SECTION=multimedia_libs
+
+config FREETYPE
+	tristate
+	prompt "freetype"
+	select ZLIB
+	help
+	  The FreeType project is a team of volunteers who develop free,
+	  portable and high-quality software solutions for digital typography.
+	  They specifically target embedded systems and focus on bringing small,
+	  efficient and ubiquitous products.
+	  The FreeType library is their software font engine. In version 1 this
+	  library only supports true type fonts, since version 2 it supports all
+	  types of scaleable fonts. If you intent to use this library in an X
+	  environment, its only needed on client side, not on server side.

@@ -1,0 +1,193 @@
+## SECTION=shell_and_console
+
+menuconfig KBD
+	tristate
+	prompt "kbd                           "
+	help
+	  The kbd package contains keytable files and keyboard utilities
+	  compatible with kernel version 1.1.54 and later. Setfont requires
+	  1.1.92 or later.
+
+if KBD
+
+config KBD_CHVT
+	bool
+	prompt "chvt"
+	depends on !BUSYBOX_CHVT || ALLYES
+	help
+	  chvt - change foreground virtual terminal
+
+comment "BusyBox' chvt is selected!"
+	depends on BUSYBOX_CHVT
+
+config KBD_DEALLOCVT
+	bool
+	prompt "deallocvt"
+	depends on !BUSYBOX_DEALLOCVT || ALLYES
+	help
+	  deallocvt - deallocate unused virtual terminals
+
+comment "BusyBox' deallocvt is selected!"
+	depends on BUSYBOX_DEALLOCVT
+
+config KBD_DUMPKEYS
+	bool
+	prompt "dumpkeys"
+	help
+	  dumpkeys - dump keyboard translation tables
+
+config KBD_FGCONSOLE
+	bool
+	prompt "fgconsole"
+	depends on !BUSYBOX_FGCONSOLE || ALLYES
+	help
+	  print the number of the active VT
+
+comment "BusyBox' fgconsole is selected!"
+	depends on BUSYBOX_FGCONSOLE
+
+config KBD_GETKEYCODES
+	bool
+	prompt "getkeycodes"
+	help
+	  getkeycodes - print kernel scancode-to-keycode mapping table
+
+config KBD_KBDINFO
+	bool
+	prompt "kbdinfo"
+	help
+	  show kbd information
+
+config KBD_KBD_MODE
+	bool
+	prompt "kbd_mode"
+	help
+	  report or set the keyboard mode
+
+config KBD_KBDRATE
+	bool
+	prompt "kbdrate"
+	help
+	  reset the keyboard repeat rate and delay time
+
+config KBD_LOADKEYS
+	bool
+	prompt "loadkeys"
+	help
+	  loadkeys - load keyboard translation tables
+
+config KBD_LOADUNIMAP
+	bool
+	prompt "loadunimap"
+	help
+	  load the kernel unicode-to-font mapping table
+
+config KBD_MAPSCRN
+	bool
+	prompt "mapscrn"
+	help
+	  load screen output mapping table
+
+config KBD_OPENVT
+	bool
+	prompt "openvt"
+	depends on !BUSYBOX_OPENVT || ALLYES
+	help
+	  start a program on a new virtual terminal (VT)
+
+comment "BusyBox' openvt is selected!"
+	depends on BUSYBOX_OPENVT
+
+config KBD_PSFXTABLE
+	bool
+	prompt "psfxtable"
+	help
+	  handle Unicode character tables for console fonts
+
+config KBD_SETFONT
+	bool
+	prompt "setfont"
+	help
+	  load EGA/VGA console screen font
+
+config KBD_SETKEYCODES
+	bool
+	prompt "setkeycodes"
+	depends on !BUSYBOX_SETKEYCODES || ALLYES
+	help
+	  setkeycodes - load kernel scancode-to-keycode mapping table entries
+
+comment "BusyBox' setkeycodes is selected!"
+	depends on BUSYBOX_SETKEYCODES
+
+config KBD_SETLEDS
+	bool
+	prompt "setleds"
+	help
+	  set the keyboard leds
+
+config KBD_SETMETAMODE
+	bool
+	prompt "setmetamode"
+	help
+	  define the keyboard meta key handling
+
+config KBD_SETVTRGB
+	bool
+	prompt "setvtrgb"
+	help
+	  set the virtual terminal RGB colors
+
+config KBD_SHOWCONSOLEFONT
+	bool
+	prompt "showconsolefont"
+	help
+	  Show the current EGA/VGA console screen font
+
+config KBD_SHOWKEY
+	bool
+	prompt "showkey"
+	depends on !BUSYBOX_SHOWKEY || ALLYES
+	help
+	  showkey - examine the scan codes and keycodes sent by the keyboard
+
+comment "BusyBox' showkey is selected!"
+	depends on BUSYBOX_SHOWKEY
+
+config KBD_UNICODE_START
+	bool
+	prompt "unicode_start"
+	help
+	  put keyboard and console in unicode mode
+
+config KBD_UNICODE_STOP
+	bool
+	prompt "unicode_stop"
+	help
+	  revert keyboard and console from unicode mode
+
+config KBD_CONSOLEFONTS
+	bool
+	prompt "install consolefonts"
+	help
+	  install consolefonts to /usr/share/consolefonts
+
+config KBD_CONSOLETRANS
+	bool
+	prompt "install consoletrans"
+	help
+	  install consoletrans to /usr/share/consoletrans
+
+config KBD_KEYMAPS
+	bool
+	prompt "install keymaps"
+	help
+	  install keymaps to /usr/share/keymaps
+
+config KBD_UNIMAPS
+	bool
+	prompt "install unimaps"
+	help
+	  install unimaps to /usr/share/unimaps
+
+endif

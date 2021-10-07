@@ -1,0 +1,75 @@
+## SECTION=bootloader
+
+menuconfig U_BOOT
+	select BOOTLOADER
+	prompt "U-Boot                        "
+	bool
+
+if U_BOOT
+
+config U_BOOT_VERSION
+	string
+	default 1.2.0
+	prompt "U-Boot version"
+	help
+	  Enter the Uboot version you want to build. Usally something like "1.2.0"
+
+config U_BOOT_MD5
+	string
+	prompt "U-Boot source md5"
+
+config U_BOOT_SERIES
+	prompt "patch series file"
+	string
+	default "series"
+	help
+	  This entry specifies a patch series file which has to live in
+	  the u-boot patches directory. This way you can set a different
+	  series file than the default.
+
+config U_BOOT_CONFIG
+	string
+	prompt "U-Boot config target"
+	help
+	  The U-Boot make config target. Usually something like
+	  "yourbox_config". See Uboot's main Makefile for possible
+	  configuration targets.
+
+comment "target install"
+
+config U_BOOT_INSTALL_SREC
+	prompt "install u-boot.srec"
+	bool
+	help
+	  Installing the U-Boot srec hexfile into platform image directory.
+
+config U_BOOT_INSTALL_ELF
+	prompt "install u-boot.elf"
+	bool
+	help
+	  Installing the U-Boot ELF binary into platform image directory.
+
+config U_BOOT_INSTALL_MLO
+	prompt "install MLO"
+	bool
+	depends on !X_LOAD
+	help
+	  Installing the U-Boot SPL ("MLO") binary needed for OMAP CPUs into platform
+	  image directory.
+
+config U_BOOT_INSTALL_U_BOOT_IMG
+	prompt "install u-boot.img"
+	bool
+	help
+	  Installing the u-boot image with header ("u-boot.img") which is executed
+	  by u-boot SPL ("MLO") into platform image directory.
+
+config U_BOOT_INSTALL_U_BOOT_IMX
+	prompt "install u-boot.imx"
+	bool
+	help
+	  Installing the U-Boot image with imx header (u-boot.imx) into platform 
+	  image directory. Say yes if you are building for freescale i.MX SOC
+
+endif
+

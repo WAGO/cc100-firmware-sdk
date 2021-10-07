@@ -1,0 +1,30 @@
+From: Luotao Fu <l.fu@pengutronix.de>
+Date: Fri, 4 Jun 2010 10:36:42 +0200
+Subject: [PATCH] getkeycode: show reserved scancode
+
+The scancode 0 is usually reserved. Hence the getkeycodes starts scanning at 1.
+However, the scancode can still be used in some special cases, e.g. for a matrix
+keypad with board specific combination of keycodes and scancodes. This one
+change the scan range to start from 0.
+
+probably not for mainline, as far kdb is maintained et all.
+
+Signed-off-by: Luotao Fu <l.fu@pengutronix.de>
+Signed-off-by: Alexander Aring <alex.aring@gmail.com>
+---
+ src/getkeycodes.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/getkeycodes.c b/src/getkeycodes.c
+index 7baa0919cfdc..485b9096b3f4 100644
+--- a/src/getkeycodes.c
++++ b/src/getkeycodes.c
+@@ -50,7 +50,7 @@ int main(int argc, char **argv)
+ 	if (ioctl(fd, KDGETKEYCODE, &a)) {
+ 		sc0 = 89;
+ 	} else
+-		for (sc0 = 1; sc0 <= 88; sc0++) {
++		for (sc0 = 0; sc0 <= 88; sc0++) {
+ 			a.scancode = sc0;
+ 			a.keycode  = 0;
+ 			if (ioctl(fd, KDGETKEYCODE, &a) || a.keycode != sc0)

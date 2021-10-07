@@ -1,0 +1,11 @@
+## SECTION=image2
+
+config IMAGE_SD
+	tristate
+	select HOST_GENIMAGE
+	select HOST_UTIL_LINUX_NG
+	select IMAGE_ROOT_EXT
+	select IMAGE_BOOT_MLO
+	prompt "Generate images/sd.hdimg"
+	help
+	  FIXME

@@ -1,0 +1,9 @@
+## SECTION=elrest_specific_tools
+
+config LIBMSGTOOL
+	tristate
+	select GLIB
+	select HOST_GLIB
+	prompt "libmsgtool"
+	help
+	  FIXME

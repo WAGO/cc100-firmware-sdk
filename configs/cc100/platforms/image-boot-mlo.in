@@ -1,0 +1,37 @@
+## SECTION=image2
+
+config IMAGE_BOOT_MLO
+	tristate
+	select HOST_GENIMAGE
+	select HOST_DOSFSTOOLS
+	select HOST_MTOOLS
+    select BAREBOX
+#    select BAREBOX_MLO
+#    select BAREBOX_MLO_NAND
+	select KERNEL
+	prompt "Generate images/vfat.config"
+	help
+	  FIXME
+
+config INSTALL_BOOT_CUSTOM_SETUP
+#       depends on IMAGE_BOOT_MLO
+       bool
+       default n
+       prompt "Install custom_setup.sh to boot partition"
+       help
+	This file will be executed during production mode prior
+	the production setup script
+
+menuconfig IMAGE_BOOT_VFAT_CMDLINE
+#       depends on IMAGE_BOOT_MLO
+       bool
+       prompt "Install Linux Command Line into cmdline"
+
+if IMAGE_BOOT_VFAT_CMDLINE
+
+config IMAGE_BOOT_VFAT_KERNEL_CMDLINE
+       string
+       default "console=ttyO2,115200 root=/dev/mmcblk0p2 rw rootfstype=ext3 rootwait"
+       prompt "Command Line"
+endif
+

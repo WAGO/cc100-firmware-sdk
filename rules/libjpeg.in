@@ -1,0 +1,22 @@
+## SECTION=multimedia_libs
+
+menuconfig LIBJPEG
+	tristate
+	select HOST_LIBJPEG
+	select CROSS_NASM
+	prompt "libjpeg-turbo                 "
+	help
+	  libjpeg-turbo is a library for handling the JPEG (JFIF) image format
+	  that uses SIMD instructions (MMX, SSE2, AVX2, NEON, AltiVec) to
+	  accelerate baseline JPEG compression an decompression.
+
+if LIBJPEG
+
+config LIBJPEG_BIN
+	bool
+	prompt "Install libjpeg binaries cjpeg and djpeg"
+	help
+	  cjpeg and djpeg are simple bineries to convert some basic image
+	  formats to jpeg (cjpeg) or convert them back from jpeg (djpeg)
+
+endif

@@ -1,0 +1,9 @@
+## SECTION=elrest_specific_tools
+
+config GPTFDISK
+	tristate
+	select LIBPOPT
+	select HOST_GPTFDISK
+	prompt "gptfdisk"
+	help
+	  FIXME

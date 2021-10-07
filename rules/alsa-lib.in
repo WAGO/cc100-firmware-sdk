@@ -1,0 +1,107 @@
+## SECTION=multimedia_sound
+
+menuconfig ALSA_LIB
+	tristate
+	prompt "alsa libraries                "
+	select LIBC_DL
+	select LIBC_M
+	select LIBC_PTHREAD
+	select LIBC_RT
+	select GCCLIBS_GCC_S
+	select ALSA_LIB_MIXER		if ALSA_LIB_UCM
+	help
+	  This is the userspace library to the kernel's "Advanced Linux Sound Architecture" feature
+
+if ALSA_LIB
+
+config ALSA_LIB_ASOUND_CONF
+	bool
+	prompt "install /etc/asound.conf from projectroot"
+	help
+	  install a asound.conf file from the projectroot
+
+config ALSA_LIB_RESMGR
+	bool
+	depends on BROKEN
+	prompt "resmgr"
+	help
+	  support resmgr (optional component)
+
+config ALSA_LIB_READ
+	bool
+	default y
+	prompt "read support"
+	help
+	  Reading /dev/aload* is the default. Disable it on demand
+
+config ALSA_LIB_MIXER
+	bool
+	select ALSA_LIB_PCM
+	default y
+	prompt "mixer"
+	help
+	  Disable the mixer component if you do not need it
+
+config ALSA_LIB_PCM
+	bool
+	default y
+	prompt "pcm"
+	help
+	  Disable the PCM component if you do not need it
+
+config ALSA_LIB_PCM_MODULES
+	depends on ALSA_LIB_PCM
+	string
+	prompt "pcm modules"
+	default "all"
+	help
+	  You can use the keyword 'all' here for all supported PCM modules or a
+	  comma separated list of required module keywords. The list of module
+	  keywords is:
+	    copy linear route mulaw alaw adpcm rate plug multi shm file null
+	    empty share meter hooks lfloat ladspa dmix dshare dsnoop asym
+	    iec958 softvol extplug ioplug mmap_emul
+
+config ALSA_LIB_RAWMIDI
+	bool
+	default y
+	prompt "raw midi support"
+	help
+	  Disable the raw MIDI component if you do not need it
+
+config ALSA_LIB_HWDEP
+	bool
+	default y
+	prompt "hwdep"
+	help
+	  Disable the hwdep component if you do not need it
+
+config ALSA_LIB_SEQ
+	bool
+	select ALSA_LIB_PCM
+	default y
+	prompt "sequencer"
+	help
+	  Disable the sequencer component if you do not need it
+
+config ALSA_LIB_UCM
+	bool
+	default y
+	prompt "use-case-manager"
+	help
+	  Disable the use-case-manager component if you do not need it
+
+config ALSA_LIB_ALISP
+	bool
+	default y
+	# alisp itself broken in 1.1.7 builds now (alsa-lib commit 639d404),
+	# but then targets SI7018/sndo[cp]-mixer.alisp in src/conf/cards/
+	# fail (missing in tarball, present in git tree).
+	depends on BROKEN
+	prompt "alisp"
+	help
+	  Disable the alisp component if you do not need it
+
+
+endif
+

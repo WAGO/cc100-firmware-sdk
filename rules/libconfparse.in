@@ -1,0 +1,7 @@
+## SECTION=elrest_specific_tools
+
+config LIBCONFPARSE
+	tristate
+	prompt "libconfparse"
+	help
+	  FIXME
