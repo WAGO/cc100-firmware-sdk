@@ -352,7 +352,7 @@ We will use /dev/sde for example.
 ```
 
 ## 7.) Boot cc100 with custom image "sd.hdimg" on SD-Card
-cc100 boot device order checks SD-Card slot before internal NAND.\
+cc100 boot device order checks SD-Card slot before internal memory.\
 By default, cc100 tries to find a DHCP-Server to retrieve an IP-Address.
 
 1. PowerOff cc100
