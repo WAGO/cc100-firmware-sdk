@@ -96,7 +96,7 @@ These steps will only concentrate on the recommented Ubuntu version:
     >cd ~
     >mkdir -p wago/ptxproj/
     >cd wago/ptxproj/
-    >git clone https://github.com/WAGO/cc100-firmware-sdk-adv.git .
+    >git clone https://github.com/WAGO/cc100-firmware-sdk.git .
 ```
 
 ## 2.) Install "cross toolchain"
