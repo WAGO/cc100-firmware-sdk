@@ -307,7 +307,6 @@ Afterwards you should find the firmware image "sd.hdimg" in folder
 
 
 ## 6.) Write the binary image file "sd.hdimg" to SD-Card
-ATTENTION: Size of generated 'sd.hdimg' has been changed to 204MB.
 
 ### 6.1) Virtual machine on a windows host
 
@@ -347,9 +346,9 @@ We will use /dev/sde for example.
 ```
     >sudo dd if=sd.hdimg of=/dev/sde 
     [sudo] password for <user>:
-    399360+0 Datasets in
-    399360+0 Datasets out
-    204427320 Bytes (204 MB) copied, 73.5553 s, 2.8 MB/s
+    1126400+0 Datensätze ein
+    1126400+0 Datensätze aus
+    576716800 bytes (577 MB, 550 MiB) copied, 8,21052 s, 70.2 MB/s
 ```
 
 ## 7.) Boot cc100 with custom image "sd.hdimg" on SD-Card
