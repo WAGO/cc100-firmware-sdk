@@ -379,32 +379,19 @@ Where 'uvwxyz' is the last part of eth0's MAC-ID in capital letters.
 - SSH-Daemon is enabled.
 - https-Server is enabled.
 
-### 8.4) Service Interface
-Prepared to dial with:
-- "WAGO IO-Check.exe" version 5.3.1.17 or higher 
-- "WAGO EthernetSettings.exe" version 5.4.1.3 or higher
-REQUIRE: WAGO-Service-Cable 750-920 or 750-923
-
-### 8.5) PFC Onboard Serial Interface X3 "/dev/ttyO0"(9p SubD):
+### 8.4) PFC Onboard Serial Interface X3 "/dev/ttyO0"(9p SubD):
 Is no more owned by operating system Linux, so it has to be configured to be the console output.\
 This can be easily be done via the web-confuguration.
 
-### 8.6) Get in touch with your cc100 the first time
+### 8.5) Get in touch with your cc100 the first time
 
-- Variant A: Use tool WAGO-IO-Check to set ip address or obtain actual\
-A.1) Connect PFC-Service-Interface and PC with Service-Cable 750-920 or 750-923.\
-A.2) Start windows tool "WAGO-IO-Check.exe".\
-A.3) Configure local serial interface to use\
-A.4) Press button [Identify]\
-A.5) Move to register card "Network"\
-
-- Variant B: Web-Based-Management(WBM) via https\
+- Variant A: Web-Based-Management(WBM) via https\
 B.0) Obtain actual IP address\
 B.1) Open WBM in browser(https://<ip or hostname>)\
 B.2) Ignore x509 certificate warning and proceed.\
 B.3) Now you should be able to view and change settings.\
 
-- Variant C: Command-Line-Interface(CLI) via ssh\
+- Variant B: Command-Line-Interface(CLI) via ssh\
 C.0) Obtain actual IP address\
 C.1) Start ssh-client, such as putty\
 C.2) Open ssh session to cc100 <ip or hostname>)\
