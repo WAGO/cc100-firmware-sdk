@@ -96,7 +96,7 @@ These steps will only concentrate on the recommented Ubuntu version:
     >cd ~
     >mkdir -p wago/ptxproj/
     >cd wago/ptxproj/
-    >git clone https://github.com/WAGO/cc100-firmware-sdk-adv.git .
+    >git clone https://github.com/WAGO/cc100-firmware-sdk.git .
 ```
 
 ## 2.) Install "cross toolchain"
@@ -307,7 +307,6 @@ Afterwards you should find the firmware image "sd.hdimg" in folder
 
 
 ## 6.) Write the binary image file "sd.hdimg" to SD-Card
-ATTENTION: Size of generated 'sd.hdimg' has been changed to 204MB.
 
 ### 6.1) Virtual machine on a windows host
 
@@ -347,13 +346,13 @@ We will use /dev/sde for example.
 ```
     >sudo dd if=sd.hdimg of=/dev/sde 
     [sudo] password for <user>:
-    399360+0 Datasets in
-    399360+0 Datasets out
-    204427320 Bytes (204 MB) copied, 73.5553 s, 2.8 MB/s
+    1126400+0 Datensätze ein
+    1126400+0 Datensätze aus
+    576716800 bytes (577 MB, 550 MiB) copied, 8,21052 s, 70.2 MB/s
 ```
 
 ## 7.) Boot cc100 with custom image "sd.hdimg" on SD-Card
-cc100 boot device order checks SD-Card slot before internal NAND.\
+cc100 boot device order checks SD-Card slot before internal memory.\
 By default, cc100 tries to find a DHCP-Server to retrieve an IP-Address.
 
 1. PowerOff cc100
@@ -380,32 +379,19 @@ Where 'uvwxyz' is the last part of eth0's MAC-ID in capital letters.
 - SSH-Daemon is enabled.
 - https-Server is enabled.
 
-### 8.4) Service Interface
-Prepared to dial with:
-- "WAGO IO-Check.exe" version 5.3.1.17 or higher 
-- "WAGO EthernetSettings.exe" version 5.4.1.3 or higher
-REQUIRE: WAGO-Service-Cable 750-920 or 750-923
-
-### 8.5) PFC Onboard Serial Interface X3 "/dev/ttyO0"(9p SubD):
+### 8.4) PFC Onboard Serial Interface X3 "/dev/ttyO0"(9p SubD):
 Is no more owned by operating system Linux, so it has to be configured to be the console output.\
 This can be easily be done via the web-confuguration.
 
-### 8.6) Get in touch with your cc100 the first time
+### 8.5) Get in touch with your cc100 the first time
 
-- Variant A: Use tool WAGO-IO-Check to set ip address or obtain actual\
-A.1) Connect PFC-Service-Interface and PC with Service-Cable 750-920 or 750-923.\
-A.2) Start windows tool "WAGO-IO-Check.exe".\
-A.3) Configure local serial interface to use\
-A.4) Press button [Identify]\
-A.5) Move to register card "Network"\
-
-- Variant B: Web-Based-Management(WBM) via https\
+- Variant A: Web-Based-Management(WBM) via https\
 B.0) Obtain actual IP address\
 B.1) Open WBM in browser(https://<ip or hostname>)\
 B.2) Ignore x509 certificate warning and proceed.\
 B.3) Now you should be able to view and change settings.\
 
-- Variant C: Command-Line-Interface(CLI) via ssh\
+- Variant B: Command-Line-Interface(CLI) via ssh\
 C.0) Obtain actual IP address\
 C.1) Start ssh-client, such as putty\
 C.2) Open ssh session to cc100 <ip or hostname>)\
