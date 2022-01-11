@@ -6,6 +6,4 @@ config HOST_GPTFDISK
 	select HOST_LIBUUID
 	select HOST_LIBPOPT
 	select HOST_UTIL_LINUX_NG
-	select LIBPOPT
-	select LIBUUID
 	default y if ALLYES

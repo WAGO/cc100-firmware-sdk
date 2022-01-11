@@ -116,6 +116,7 @@ ifdef PTXCONF_ELREST_CUSTOM_XORG_CONFIG_INSTALL
 endif
 
 ifdef PTXCONF_ELREST_CUSTOM_PEKWM_CONFIG_INSTALL
+	@$(call install_copy, elrest-custom-install, ${PTXCONF_ROOTFS_PASSWD_USER_UID}, ${PTXCONF_ROOTFS_PASSWD_USER_GID}, 0755, /home/user)
 	@$(call install_alternative, elrest-custom-install, 0, 0, 0644, /home/.pekwm/autoproperties)
 	@$(call install_alternative, elrest-custom-install, 0, 0, 0644, /home/.pekwm/config)
 	@$(call install_alternative, elrest-custom-install, 0, 0, 0644, /home/.pekwm/desktop)
@@ -126,6 +127,7 @@ ifdef PTXCONF_ELREST_CUSTOM_PEKWM_CONFIG_INSTALL
 	@$(call install_alternative, elrest-custom-install, 0, 0, 0755, /home/.pekwm/start)
 	@$(call install_alternative, elrest-custom-install, 0, 0, 0644, /home/.pekwm/vars)
 	@$(call install_alternative, elrest-custom-install, 0, 0, 0755, /home/.xinitrc)
+	@$(call install_copy, elrest-custom-install, 0, 0, 0700, /root)
 	@$(call install_link, elrest-custom-install, /home/.xinitrc, /root/.xinitrc)
 	rm -Rf $(BUILDDIR)/../root-debug/etc/pekwm && rm -Rf $(BUILDDIR)/../root-debug/.pekwm && rm -Rf $(BUILDDIR)/../root-debug/root/.pekwm && \
 	rm -Rf $(ROOTDIR)/etc/pekwm && rm -Rf $(ROOTDIR)/.pekwm && rm -Rf $(ROOTDIR)/root/.pekwm
@@ -135,11 +137,13 @@ ifdef PTXCONF_ELREST_CUSTOM_PEKWM_CONFIG_INSTALL
 endif
 
 ifdef PTXCONF_ELREST_CUSTOM_FLUXBOX_CONFIG_INSTALL
+	@$(call install_copy, elrest-custom-install, 0, 0, 0700, /root)
 	@$(call install_alternative, elrest-custom-install, 0, 0, 0755, /root/.xinitrc)
 	@$(call install_alternative_tree, elrest-custom-install, 0, 0,  /root/.fluxbox)
 endif
 
 ifdef PTXCONF_ELREST_CUSTOM_ICEWM_CONFIG_INSTALL
+	@$(call install_copy, elrest-custom-install, 0, 0, 0700, /root)
 	@$(call install_alternative, elrest-custom-install, 0, 0, 0644, /etc/specific/icewm.conf)
 endif
 
@@ -176,6 +180,7 @@ ifdef PTXCONF_START_MICROBROWSER
 endif
 
 ifdef PTXCONF_ELREST_CUSTOM_USER_FILES_INSTALL
+	@$(call install_copy, elrest-custom-install, ${PTXCONF_ROOTFS_PASSWD_USER_UID}, ${PTXCONF_ROOTFS_PASSWD_USER_GID}, 0755, /home/user)
 	@$(call install_alternative, elrest-custom-install, 0, 0, 0644, /home/user/logo.png)
 endif
 
@@ -234,7 +239,7 @@ ifdef PTXCONF_ELREST_CUSTOM_CONFIG_FILES_INSTALL
 	@$(call install_alternative_tree, elrest-custom-install, 0, 0,  /root/.config)
 	@$(call install_alternative, elrest-custom-install, 0, 0, 0640, /etc/pio2_wretain_direct.conf)
 	@$(call install_alternative, elrest-custom-install, 0, 0, 0755, /etc/script/setup_hdmi.sh)
-
+	@$(call install_link, elrest-custom-install, /usr/share, /share)
   
 # only temporarily   TODO remove later
 	@$(call install_alternative, elrest-custom-install, 0, 0, 0644, /etc/specific/network-interfaces-with-modem.xml)

@@ -1,8 +1,0 @@
-## SECTION=system_libraries
-
-config LIBUNWIND
-	tristate
-	prompt "libunwind"
-	help
-	  Portable and efficient C programming interface to determine the
-	  call-chain of a program.

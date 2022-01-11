@@ -9,7 +9,7 @@ if U_BOOT
 
 config U_BOOT_VERSION
 	string
-	default 1.2.0
+	default "1.2.0"
 	prompt "U-Boot version"
 	help
 	  Enter the Uboot version you want to build. Usally something like "1.2.0"

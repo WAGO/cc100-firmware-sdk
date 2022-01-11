@@ -3,6 +3,7 @@
 config GPTFDISK
 	tristate
 	select LIBPOPT
+	select LIBUUID
 	select HOST_GPTFDISK
 	prompt "gptfdisk"
 	help

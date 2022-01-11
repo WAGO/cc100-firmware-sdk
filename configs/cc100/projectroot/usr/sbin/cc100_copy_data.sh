@@ -206,7 +206,7 @@ function copy_rootfs
     for dir in ${src_root}/*; do
         print_dbg "    processing $dir..."
         case ${dir} in
-            *dev|*sys|*proc|*tmp|*home|*mnt|*media|*run|*boot)
+            *dev|*sys|*proc|*tmp|*home|*mnt|*media|*run|*boot|*config)
                 mkdir -p "${dst_root}/${dir}"
                 ;;
             *var)
@@ -396,6 +396,18 @@ EOF
     return $INVALID_PARAMETER
 }
 
+function erase_sd_gpt
+{
+  # erase / renew GPT headers
+  local device=$1
+  # option -Z twice in order to fix damaged partition data
+  set +e
+  sgdisk -Z ${device} || true
+  sgdisk -Z ${device} || true
+  partprobe ${device} || true
+  set -e
+}
+
 function reformat_sd_gpt
 {
     local sd_card_size=$(( $(($1 + ${G_BOOT_PART_SIZE_MB} + ${G_PART_ALIGNMENT_MB})) * 1024 * 1024 )) # rootfs size + /boot size + (boot_fs offset)
@@ -418,29 +430,34 @@ function reformat_sd_gpt
         # Delete MBR (win7 stores its FAT there :( )
         # --zap-all deletes the MBR
 
-        # Create 2 $G_PART_ALIGNMENT_MB aligned partitions: 1st one is $G_BOOT_PART_SIZE_MB large.
-        # 2nd one is ${image_size} - $G_BOOT_PART_SIZE_MB large, aligned at $G_PART_ALIGNMENT_MB 
-
         if [[ "${sd_card_size}" != "" ]]; then
 
-            local root_part_offset=$(/etc/config-tools/get_min_sd_card_size rootfs-offset)
-            local root_part_size=$((${image_size} - ${root_part_offset}))
-
+            echo "create partitions"
             max_image_size=$[$(/etc/config-tools/get_device_data size $(/etc/config-tools/get_device_data name sd-card)) / 1024]
+            #clean / renew GPT headers
+            erase_sd_gpt ${sd_card_device}
+
             if [[ ${image_size} -ge ${max_image_size} ]]; then
                 # use all available space
-                root_part_size=""
+                # FULL SIZE
+                sgdisk --resize-table=128 -a 1 \
+                -n 1:${FSBL1_FIRST_SECTOR}:${FSBL1_LAST_SECTOR}  -c 1:fsbl1 \
+                -n 2:${FSBL2_FIRST_SECTOR}:${FSBL2_LAST_SECTOR}  -c 2:fsbl2 \
+                -n 3:${SSBL_FIRST_SECTOR}:${SSBL_LAST_SECTOR} -c 3:ssbl \
+                -n 4:${BOOT_FIRST_SECTOR}:${BOOT_LAST_SECTOR} -c 4:BOOT -t 4:0700 \
+                -n 5:${ROOTFS_FIRST_SECTOR}: -c 5:rootfs \
+                -p ${sd_card_device}
+            else
+                # REDUCE TO CONTENT
+                sgdisk --resize-table=128 -a 1 \
+                -n 1:${FSBL1_FIRST_SECTOR}:${FSBL1_LAST_SECTOR}  -c 1:fsbl1 \
+                -n 2:${FSBL2_FIRST_SECTOR}:${FSBL2_LAST_SECTOR}  -c 2:fsbl2 \
+                -n 3:${SSBL_FIRST_SECTOR}:${SSBL_LAST_SECTOR} -c 3:ssbl \
+                -n 4:${BOOT_FIRST_SECTOR}:${BOOT_LAST_SECTOR} -c 4:BOOT -t 4:0700 \
+                -n 5:${ROOTFS_FIRST_SECTOR}:${ROOTFS_LAST_SECTOR} -c 5:rootfs \
+                -p ${sd_card_device} 
             fi
-
-            echo "create partitions"
-            sgdisk --zap-all ${sd_card_device} && \
-            sgdisk --resize-table=128 -a 1 \
-            -n 1:${FSBL1_FIRST_SECTOR}:${FSBL1_LAST_SECTOR}  -c 1:fsbl1 \
-            -n 2:${FSBL2_FIRST_SECTOR}:${FSBL2_LAST_SECTOR}  -c 2:fsbl2 \
-            -n 3:${SSBL_FIRST_SECTOR}:${SSBL_LAST_SECTOR} -c 3:ssbl \
-            -n 4:${BOOT_FIRST_SECTOR}:${BOOT_LAST_SECTOR} -c 4:BOOT -t 4:0700 \
-            -n 5:${ROOTFS_FIRST_SECTOR}: -c 5:rootfs \
-            -p ${sd_card_device}
+            
             if [ $? -eq 0 ]; then
               echo "create partitions ok"
             else

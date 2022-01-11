@@ -121,6 +121,9 @@ source "generated/wago_specific_wbm_plugins.in"
 endmenu
 endmenu
 
+menu "Parameter Provider            "
+source "generated/wago_specific_paramprovider.in"
+endmenu
 
 comment "------------------------------------"
 

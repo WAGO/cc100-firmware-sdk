@@ -1,3 +1,29 @@
+Firmware Release 03.08.08 (99)
+
+System:
+[-]
+
+Runtime System:
+[FIXED] New CODESYS Packages. Previous CODESYS Packages is marked as debug version and shall 
+        therefore be uninstalled.
+[FIXED] Create image using WBM SD card (Ext4) applicable.
+[FIXED] WBM CreateImage -> create bootable SD card image Option "Reduce to content" applicable.
+[FIXED] Evoked warnings in device tree will no longer be present and status mes-sage for 
+        Common.PCI is no longer displayed.
+[FIXED] SD card formattable to FAT or Ext4 via the WBM.
+
+Fieldbus Interface & Protocols:
+[-]
+
+Functional change:
+[-]
+
+Beta functionalities:
+[BETA] Integration of Docker Deamon. IPK Software upload via WBM. Remains the same as with 
+       previous Firmware of CC100. Now, Difference to PFC200
+
+################################################################################
+
 Firmware Release 03.07.14 (99)
 
 //TODO

@@ -24,12 +24,11 @@ PACKAGES-$(PTXCONF_WAGO_PARAMETER_SERVICE_COM) += wago-parameter-service-com
 #
 # Paths and names
 #
-WAGO_PARAMETER_SERVICE_COM_VERSION        := 0.3.0
+WAGO_PARAMETER_SERVICE_COM_VERSION        := 0.4.0
 WAGO_PARAMETER_SERVICE_COM_MD5            :=
 WAGO_PARAMETER_SERVICE_COM_BASE           := parameter-service-com
 WAGO_PARAMETER_SERVICE_COM                := wago-$(WAGO_PARAMETER_SERVICE_COM_BASE)-$(WAGO_PARAMETER_SERVICE_COM_VERSION)
 WAGO_PARAMETER_SERVICE_COM_SUFFIX         := tar.gz
-WAGO_PARAMETER_SERVICE_COM_URL            := file://wago_intern/$(WAGO_PARAMETER_SERVICE_COM_BASE)
 WAGO_PARAMETER_SERVICE_COM_BUILDCONFIG    := Release
 WAGO_PARAMETER_SERVICE_COM_SRC_DIR        := $(PTXDIST_WORKSPACE)/wago_intern/$(WAGO_PARAMETER_SERVICE_COM_BASE)
 WAGO_PARAMETER_SERVICE_COM_BUILDROOT_DIR  := $(BUILDDIR)/$(WAGO_PARAMETER_SERVICE_COM)
@@ -59,12 +58,6 @@ ifndef PTXCONF_WAGO_TOOLS_BUILD_VERSION_BINARIES
 	fi
 endif
 	@$(call touch)
-
-ifdef PTXCONF_WAGO_TOOLS_BUILD_VERSION_BINARIES
-$(STATEDIR)/wago-parameter-service-com.extract.post:
-	@$(call targetinfo)
-	@$(call touch)
-endif
 
 # ----------------------------------------------------------------------------
 # Prepare

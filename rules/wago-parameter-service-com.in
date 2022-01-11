@@ -8,15 +8,17 @@ config WAGO_PARAMETER_SERVICE_COM
 	select LIBCOMMONHEADER
 	select WAGO_TRACE
 	select WAGO_PARAMETER_SERVICE_CORE
-	select BOOST                         if WAGO_PARAMETER_SERVICE_COM_LIB
-	select BOOST_SYSTEM                  if WAGO_PARAMETER_SERVICE_COM_LIB
+	select BOOST                                if WAGO_PARAMETER_SERVICE_COM_LIB
+	select BOOST_SYSTEM                         if WAGO_PARAMETER_SERVICE_COM_LIB
+	select WAGO_PARAMETER_SERVICE_COM_LOGGING   if WAGO_PARAMETER_SERVICE_COM_LIB
+	select WAGO_PARAMETER_SERVICE_COM_LIB       if WAGO_PARAMETER_SERVICE_CLIENT_LIB
+	select WAGO_PARAMETER_SERVICE_COM_LOGGING   if WAGO_PARAMETER_SERVICE_CLIENT_LIB
+	select NLOHMANN_JSON                        if WAGO_PARAMETER_SERVICE_TEST_LIB
 
 config WAGO_PARAMETER_SERVICE_COM_LIB
 	bool
 	default n
 	prompt "WAGO Parameter Service Communication Library"
-	select WAGO_PARAMETER_SERVICE_COM
-	select WAGO_PARAMETER_SERVICE_COM_LOGGING
 	help
 	  WAGO Parameter Service communication library to connect processes to parameter service daemon.
 
@@ -24,7 +26,6 @@ config WAGO_PARAMETER_SERVICE_COM_LOGGING
 	bool
 	default n
 #	prompt "WAGO Parameter Service Logging Library"
-	select WAGO_PARAMETER_SERVICE_COM
 	help
 	  Static library to provide tracing functionality.
 
@@ -32,8 +33,6 @@ config WAGO_PARAMETER_SERVICE_CLIENT_LIB
 	bool
 	default n
 #	prompt "WAGO Parameter Service Client Library"
-	select WAGO_PARAMETER_SERVICE_COM_LIB
-	select WAGO_PARAMETER_SERVICE_COM_LOGGING
 	help
 	  Static library to provide daemon functionality for providers.
 
@@ -41,7 +40,5 @@ config WAGO_PARAMETER_SERVICE_TEST_LIB
 	bool
 	default n
 #	prompt "WAGO Parameter Service Test Library"
-	select WAGO_PARAMETER_SERVICE_COM
-	select GOOGLETEST
 	help
 	  Static library to provide common test functionality for Google Test/Mock.

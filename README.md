@@ -1,6 +1,11 @@
 ***The open source software is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.***
 
 # FIRMWARE FOR CC100
+
+# ..:: Attention ::.. 
+## Starting with firmware 20.1 you need to update the ptxdist buildsystem. 
+[Ptxdist-Buildsystem](https://github.com/WAGO/ptxdist)
+
 # Install WAGO-PFC-SDK on Ubuntu 16.04.5 (64bit) LTS
 
 This HowTo describes steps to install the Software-Development-Kit (SDK) for cc100 on Ubuntu16.04

@@ -1,6 +1,0 @@
-## SECTION=hosttools_noprompt
-
-config HOST_LIBJPEG
-	tristate
-	select CROSS_NASM
-	default y if ALLYES

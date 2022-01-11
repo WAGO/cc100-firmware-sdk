@@ -1,4 +1,4 @@
-## SECTION=image2
+## SECTION=image
 
 menuconfig IMAGE_RAUC
 	tristate
