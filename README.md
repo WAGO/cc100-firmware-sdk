@@ -240,7 +240,7 @@ The output looks like this:
 ### 4.2) Select "hardware platform" to dial with
 ```
     >cd ~/wago/ptxproj
-    >ptxdist platform configs/cc100/platformconfig_barebox_v2021
+    >ptxdist platform configs/cc100/platformconfig
      info: selected platformconfig:
            'configs/cc100/platformconfig_barebox_v2021'
 
