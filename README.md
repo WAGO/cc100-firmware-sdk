@@ -242,7 +242,7 @@ The output looks like this:
     >cd ~/wago/ptxproj
     >ptxdist platform configs/cc100/platformconfig
      info: selected platformconfig:
-           'configs/cc100/platformconfig_barebox_v2021'
+           'configs/cc100/platformconfig'
 
      info: insufficient information in your platformconfig file
            please use 'ptxdist toolchain </path/to/toolchain>' to select your toolchain
