@@ -1,0 +1,33 @@
+#!/bin/bash
+
+# CC100 stores in EEPROM the two-point calibration data of its analog IOs.
+# This script forms the data upon a pattern well known to the BSP customer.
+# The formated data is then stored in a file $CALIB. Thus the structure of
+# that file must not be changed:
+#
+# 1st line contains an ordered list of available analog channels.
+# Other lines contain calibration points P1(x1 y1) and P2(x2 y2).
+# And each line correlates with one channel and vice versa.
+# e.g. 2nd line contains data of 1st channel
+#      3rd line contains data of 2nd channel and so on.
+#
+# Copyright (c) 2021 WAGO GmbH & Co. KG
+
+CALIB="/etc/calib"
+
+set -e
+
+case "$1" in
+start)
+        if [[ ! -f "${CALIB}" ]]; then
+		echo "PT1 PT2 AI1 AI2 AO1 AO2" > $CALIB
+		hexdump -e '4/4 "%d ""\n"' -n 96 -s 0xff14 /dev/eeprom >> $CALIB
+		chmod 0444 $CALIB
+        fi
+        ;;
+stop)
+        ;;
+*)
+        echo "Usage $0 start | stop"
+        ;;
+esac

@@ -28,12 +28,7 @@ IMAGE_SD_CONFIG	:= sd.config
 
 $(IMAGE_SD_IMAGE):
 	@$(call targetinfo)
-#	@$(call image/genimage, IMAGE_SD)
-ifeq ($(PTXCONF_TF_A), y)
-	${PTXDIST_PLATFORMCONFIGDIR}/script/CreateSdGptImg.sh barebox $(IMAGEDIR)
-else
-	${PTXDIST_PLATFORMCONFIGDIR}/script/CreateSdGptImg.sh uboot $(IMAGEDIR)
-endif
+	@$(call image/genimage, IMAGE_SD)
 	@$(call finish)
 
 # vim: syntax=make

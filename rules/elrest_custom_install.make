@@ -94,7 +94,7 @@ ifdef PTXCONF_ELREST_CUSTOM_XORG_CONFIG_INSTALL
 	@$(call install_alternative, elrest-custom-install, 0, 0, 0755, /etc/X11/xorg_1920_1080.conf)
 	@$(call install_alternative, elrest-custom-install, 0, 0, 0755, /etc/X11/xorg_1920_1080_CW.conf)
 	@$(call install_alternative, elrest-custom-install, 0, 0, 0755, /etc/X11/xorg_1920_1080_CCW.conf)
-	@$(call install_alternative, elrest-custom-install, 0, 0, 0755, /etc/X11/xorg_1920_1080_UD.conf)	
+	@$(call install_alternative, elrest-custom-install, 0, 0, 0755, /etc/X11/xorg_1920_1080_UD.conf)
 	@$(call install_alternative, elrest-custom-install, 0, 0, 0755, /etc/X11/xorg_cap_800_480.conf)
 	@$(call install_alternative, elrest-custom-install, 0, 0, 0755, /etc/X11/xorg_cap_800_480_CW.conf)
 	@$(call install_alternative, elrest-custom-install, 0, 0, 0755, /etc/X11/xorg_cap_800_480_CCW.conf)
@@ -145,13 +145,13 @@ endif
 ifdef PTXCONF_ELREST_CUSTOM_ICEWM_CONFIG_INSTALL
 	@$(call install_copy, elrest-custom-install, 0, 0, 0700, /root)
 	@$(call install_alternative, elrest-custom-install, 0, 0, 0644, /etc/specific/icewm.conf)
+	@$(call install_alternative_tree, elrest-custom-install, 0, 0,  /root/.icewm)
 endif
 
 ifdef PTXCONF_ELREST_CUSTOM_WEBKIT_CONFIG_INSTALL
 	@$(call install_alternative, elrest-custom-install, 0, 0, 0644, /home/webview_style.css)
 	@$(call install_link, elrest-custom-install, /home/webview_style.css, /root/webview_style.css)
 	@$(call install_copy, elrest-custom-install, 0, 0, 0755, /usr/lib/browser/plugins)
-	@$(call install_link, elrest-custom-install, /usr/lib/jvm/ejre1.7.0_10/lib/arm/libnpjp2.so, /usr/lib/browser/plugins/libnpjp2.so)   
 	@$(call install_alternative, elrest-custom-install, 0, 0, 0755, /home/webview_style.css)
 	@$(call install_link, elrest-custom-install, /home/webview_style.css,/root/webview_style.css)
 endif
@@ -302,6 +302,8 @@ endif
 ifeq ($(PTXCONF_PLATFORM), cc100)
 	@install -D -m644 $(BUILDDIR)/../../projectroot.cc100/usr/include/pfc-startup.h $(PTXCONF_SYSROOT_TARGET)/usr/include
 	@install -D -m644 $(BUILDDIR)/../../projectroot.cc100/usr/include/pfc_boot_table.h $(PTXCONF_SYSROOT_TARGET)/usr/include
+	@$(call install_alternative, elrest-custom-install, 0, 0, 0755, /etc/init.d/calib)
+	@$(call install_link, elrest-custom-install, ../init.d/calib, /etc/rc.d/S99_calib)
 endif
 endif
 

@@ -18,8 +18,8 @@ IMAGE_PACKAGES-$(PTXCONF_IMAGE_BOOT_MLO) += image-boot-mlo
 #
 IMAGE_BOOT_MLO		:= image-boot-mlo
 IMAGE_BOOT_MLO_DIR	:= $(BUILDDIR)/$(IMAGE_BOOT_MLO)
-IMAGE_BOOT_MLO_IMAGE	:= $(IMAGEDIR)/boot-mlo.vfat
-IMAGE_BOOT_MLO_CONFIG	:= boot-mlo-vfat.config
+IMAGE_BOOT_MLO_IMAGE	:= $(IMAGEDIR)/boot.vfat
+IMAGE_BOOT_MLO_CONFIG	:= boot.vfat.config
 
 # ----------------------------------------------------------------------------
 # Image

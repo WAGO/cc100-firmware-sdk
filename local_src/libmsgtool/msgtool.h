@@ -8,7 +8,7 @@
 ///------------------------------------------------------------------------------
 /// \file    msgtool.h
 ///
-/// \version $Id: msgtool.h 51697 2020-09-02 13:59:51Z wrueckl_elrest $
+/// \version $Id: msgtool.h 62155 2021-10-19 08:31:15Z wrueckl_elrest $
 ///
 /// \brief   interprocess communication using messages
 ///
@@ -190,6 +190,9 @@ void AppendSlash(char *pStr);
 
 int IsUsbKeyboardPresent();
 int IsUsbMousePresent();
+
+int SystemCall(char * pCmd, char * argv[]);
+int SystemCallExt(char * pCmd, char * argv[], char * pOut, int iOutSize);
 
 #ifdef __cplusplus
 }

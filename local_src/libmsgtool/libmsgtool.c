@@ -8,7 +8,7 @@
 ///------------------------------------------------------------------------------
 /// \file    libmsgtool.c
 ///
-/// \version $Id: libmsgtool.c 43946 2019-10-23 11:10:18Z wrueckl_elrest $
+/// \version $Id: libmsgtool.c 62155 2021-10-19 08:31:15Z wrueckl_elrest $
 ///
 /// \brief   lib tools, list management, messages
 ///
@@ -44,8 +44,10 @@
 #include <fcntl.h>
 #include <netdb.h>
 
-#include <errno.h>
+#include <spawn.h>
+#include <sys/wait.h>
 
+#include <errno.h>
 #include <time.h>   
 #include "msgtool.h"
 
@@ -594,14 +596,14 @@ void ConfPrintAllValues(tConfList * pHead)
 void ConfPrintAllValuesJson(tConfList * pHead, char * szOut)
 {
   tConfList * pList = pHead;
-  char szLine[512] = "";
+  char szLine[524] = "";
   char szConverted[512] = "";
   while (pList)
   {
     if (pList->pStrLeft)
     {
       ConfExpandEscapes(pList->pStrRight, szConverted);
-      sprintf(szLine, "\"%s\": \"%s\",", pList->pStrLeft, szConverted);
+      snprintf(szLine, sizeof(szLine), "\"%s\": \"%s\",", pList->pStrLeft, szConverted);
       strcat(szOut, szLine);
     }
     pList = pList->pNext;
@@ -1878,4 +1880,99 @@ int Write2PipedFifo(char * pszDev, char * pszCmd)
     }
   }
   return ret;
+}
+
+//howto char *argv[] = { "addgroup", "users", NULL };
+//howto char *pCmd = "/bin/addgroup";
+//howto int ret = SystemCall(pCmd, argv);
+extern char **environ;
+int SystemCall(char * pCmd, char * argv[])
+{
+  int iRet = 0;
+  pid_t pid;
+  int status;
+  fflush(NULL);
+  status = posix_spawn(&pid, pCmd, NULL, NULL, argv, environ);
+  if (status == 0)
+  {
+    fflush(NULL);
+    if (waitpid(pid, &status, 0) != -1)
+    {
+      iRet = WEXITSTATUS(status);
+    }
+    else
+    {
+      iRet = -1;
+    }
+  }
+  else
+  {
+    iRet = -1;
+  }
+  return iRet;
+}
+
+int SystemCallExt(char * pCmd, char * argv[], char * pOut, int iOutSize)
+{
+  int iRet = 0;
+  int pipe_file_descriptors[2];
+  posix_spawn_file_actions_t actions;
+  pid_t pid;
+  int status;
+  
+  //sanity check
+  if (pOut == NULL)
+  {
+    return -1;
+  }
+  if (iOutSize <= 0)
+  {
+    return -1;
+  }
+  //init spawn and pipe
+  if (pipe(pipe_file_descriptors) == -1) 
+  {
+    return -1;
+  }
+  if (posix_spawn_file_actions_init(&actions) != 0) 
+  {
+    return -1;
+  }
+  if (posix_spawn_file_actions_addclose(&actions, pipe_file_descriptors[0]) != 0) 
+  {
+    return -1;
+  }
+  if (posix_spawn_file_actions_adddup2(&actions, pipe_file_descriptors[1], 1) != 0) 
+  {
+    return -1;
+  }
+  //call prg
+  status = posix_spawn(&pid, pCmd, &actions, NULL, argv, environ);
+  if (status == 0)
+  {
+    fflush(NULL);
+    close(pipe_file_descriptors[1]);
+    FILE *f = fdopen(pipe_file_descriptors[0], "r");
+    if (f == NULL)
+    {
+      return -1;
+    }
+    fflush(NULL);
+    //get stdout
+    fgets(pOut, iOutSize, f);
+    fclose(f);
+    if (waitpid(pid, &status, 0) != -1)
+    {
+      iRet = WEXITSTATUS(status);
+    }
+    else
+    {
+      iRet = -1;
+    }
+  }
+  else
+  {
+    iRet = -1;
+  }
+  return iRet;
 }

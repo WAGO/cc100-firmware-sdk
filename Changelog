@@ -1,3 +1,33 @@
+Firmware Release 03.09.04 (99)
+
+System:
+[FIXED] CVE-2022-0847 Kernel bug "Dirty Pipe" enables root rights has been fixed
+[FIXED] WBM Diagnostic Information regarding Profinet has been removed
+[FIXED] SD card image size has been reduced by 50%
+[FIXED] Reading/writing to an SD card has been significantly increased.
+[FIXED] After removing a USB connection (physical disconnect), reconnection is
+		possible without reboot.
+
+Runtime System:
+[FIXED] the Codesys raw values of the RTD inputs now represent the connected
+		resistance value
+[FIXED] Control of the USR LED via IEC-Lib WagoAppAppLED possible
+[FIXED] Transitions/events of the operating mode switch (between RUN/STOP) are
+		reliably detected.
+[FIXED] Switching the operating mode switch several times does not restart the unit,
+		anymore
+
+Fieldbus Interface & Protocols:
+[-]
+
+Functional change:
+[-]
+
+Beta functionalities:
+[-]
+
+################################################################################
+
 Firmware Release 03.08.08 (99)
 
 System:
@@ -24,6 +54,3 @@ Beta functionalities:
 
 ################################################################################
 
-Firmware Release 03.07.14 (99)
-
-//TODO
