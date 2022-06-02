@@ -1,3 +1,24 @@
+Firmware Release 03.09.07 (99)
+
+System:
+[NEW] Updated ca-certificates to version NSS_3_78_RTM
+
+Runtime System:
+[-]
+
+Fieldbus Interface & Protocols:
+[NEW] Codesys EtherNet/IP Adapter activated
+[NEW] Codesys EtherNet/IP Scanner activated
+[NEW] Codesys EtherCAT Master activated
+
+Functional change:
+[-]
+
+Beta functionalities:
+[-]
+
+################################################################################
+
 Firmware Release 03.09.04 (99)
 
 System:
