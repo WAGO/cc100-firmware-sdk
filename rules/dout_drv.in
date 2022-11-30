@@ -1,8 +1,0 @@
-## SECTION=elrest_specific_drivers
-
-config DOUT_DRV
-	tristate
-	select KERNEL
-	prompt "dout_drv"
-	help
-	  FIXME

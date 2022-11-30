@@ -6,7 +6,7 @@
 #
 # This file is part of PTXdist package wago-custom-install.
 #
-# Copyright (c) 2014-2018 WAGO Kontakttechnik GmbH & Co. KG
+# Copyright (c) 2014-2022 WAGO GmbH & Co. KG
 #-----------------------------------------------------------------------------#
 #-----------------------------------------------------------------------------#
 # Script:   pfcXXX_defines
@@ -14,7 +14,7 @@
 # Brief:    Common defines for pfcXXX_* scripts. No behavior change if sourcing
 #           this file.
 #
-# Author:   MLa: WAGO Kontakttechnik GmbH & Co. KG
+# Author:   MLa: WAGO GmbH & Co. KG
 #-----------------------------------------------------------------------------#
 
 source /etc/config-tools/config_tool_lib
@@ -125,6 +125,7 @@ G_BOOT_MODE_KERNEL1=recover
 G_ETH_PORT0_LABEL="X2"
 G_ETH_PORT1_LABEL="X1"
 
+# Only enable this flag for temporary debugging purposes! Enabled debug messages
+# corrupt scripts generating jason formated output, e.g. backup and restore BAR.
 #DO_PRINT_DBG=yes
-DO_PRINT_DBG=yes
 

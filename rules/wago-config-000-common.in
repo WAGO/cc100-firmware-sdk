@@ -170,6 +170,7 @@ menuconfig CONFIG_TOOLS
   select OPENSSL
   select BOOST
   select JSONCPP
+  select LIBBSD
 
 # dependencies of single config-tools
   select CT_IPC_MSG_HEADER if PLCLINUXRT && (CT_GET_RTS_INFO || CT_GET_PLC_CONFIG)
@@ -378,7 +379,6 @@ config CT_EDIT_DNS_SERVER_DHCP
   default n
   prompt "use DNS server from DHCP offer"
   depends on CONFIG_TOOLS && (CT_EDIT_DNS_SERVER || CT_GET_DNS_SERVER)
-  select CT_BLENDER
   help
    use given dns server from dhcp offer and mix them static assigned ones.
 
@@ -416,18 +416,6 @@ config CT_WBM_MANAGE_AIDE
 #################################################################
 comment "Helper scripts"
 depends on CONFIG_TOOLS
-
-config CT_BLENDER
-  bool
-  default n
-  depends on CONFIG_TOOLS
-  prompt "blender.sh"
-  help
-    It is just a little helper script which is needed to sort given entries.
-    It will be used for sorting DNS and NTP entries which are comming from DHCP
-    and static assigned ones.
-    DNS and NTP entries have special sorting algorithms.
-
 
 config CT_FEATURE_DETECT
   bool
@@ -495,7 +483,7 @@ config CT_CONFIG_MODBUS
 config CT_CHANGE_RTS_CONFIG
   bool
   default n
-  depends on CONFIG_TOOLS && PLCLINUXRT
+  depends on CONFIG_TOOLS && (PLCLINUXRT || PLC_CODESYS_V3)
   prompt "change_rts3s_config"
   help
    Edit rts3s settings
@@ -504,7 +492,7 @@ config CT_CHANGE_RTS_CONFIG
 config CT_CONFIG_CODESYS3
   bool
   default n
-  depends on CONFIG_TOOLS && PLCLINUXRT
+  depends on CONFIG_TOOLS && PLC_CODESYS_V3
   prompt "config_codesys3"
   help
    Set codesys3 configuration options.
@@ -513,7 +501,7 @@ config CT_CONFIG_CODESYS3
 config CT_GET_RTS3SCFG_VALUE
   bool
   default n
-  depends on CONFIG_TOOLS && PLCLINUXRT
+  depends on CONFIG_TOOLS && (PLCLINUXRT || PLC_CODESYS_V3)
   prompt "get_rts3scfg_value"
   help
    Parse /etc/rts3s.cfg file.

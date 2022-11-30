@@ -1,6 +1,6 @@
 # -*-makefile-*-
 #
-# Copyright (C) 2017 by WAGO Kontakttechnik GmbH & Co. KG
+# Copyright (C) 2017 by WAGO GmbH & Co. KG
 #
 # See CREDITS for details about who has contributed to this project.
 #
@@ -16,7 +16,7 @@ PACKAGES-$(PTXCONF_FIREWALL_CONFIG) += firewall-config
 #
 # Paths and names
 #
-FIREWALL_CONFIG_VERSION        := 1.1.0
+FIREWALL_CONFIG_VERSION        := 1.3.1
 FIREWALL_CONFIG_MD5            :=
 FIREWALL_CONFIG                := firewall.elf
 FIREWALL_CONFIG_URL            := file://local_src/config-tools/$(FIREWALL_CONFIG)
@@ -97,7 +97,7 @@ $(STATEDIR)/firewall-config.targetinstall:
 	@$(call install_init, firewall-config)
 	@$(call install_fixup, firewall-config,PRIORITY,optional)
 	@$(call install_fixup, firewall-config,SECTION,base)
-	@$(call install_fixup, firewall-config,AUTHOR,"WAGO Kontakttechnik GmbH \& Co. KG")
+	@$(call install_fixup, firewall-config,AUTHOR,"WAGO GmbH \& Co. KG")
 	@$(call install_fixup, firewall-config,DESCRIPTION,missing)
 
 	@$(call install_copy, firewall-config, 0, 0, 0750, $(PTXDIST_SYSROOT_TARGET)/usr/bin/firewall.elf, /usr/bin/firewall);
@@ -170,7 +170,6 @@ endif
 	@$(call install_alternative, firewall-config, 0, 0, 0700, /etc/config-tools/events/iec60870_5_104/firewall)
 	@$(call install_alternative, firewall-config, 0, 0, 0700, /etc/config-tools/events/iec61850_mms/firewall)
 	@$(call install_alternative, firewall-config, 0, 0, 0700, /etc/config-tools/events/profinet/firewall)
-	@$(call install_alternative, firewall-config, 0, 0, 0700, /etc/config-tools/events/opcua/firewall)
 
 ifdef PTXCONF_INITMETHOD_BBINIT
 	@$(call install_alternative, firewall-config, 0, 0, 0700, /etc/init.d/firewall)

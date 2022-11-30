@@ -11,7 +11,7 @@
 # e.g. 2nd line contains data of 1st channel
 #      3rd line contains data of 2nd channel and so on.
 #
-# Copyright (c) 2021 WAGO GmbH & Co. KG
+# Copyright (c) 2021-2022 WAGO GmbH & Co. KG
 
 CALIB="/etc/calib"
 

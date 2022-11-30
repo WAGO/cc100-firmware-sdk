@@ -6,7 +6,7 @@
 # 
 # Note: this is basically the IPC script with eth1 stuff removed.
 #
-# Author: Stefanie Meihöfer, WAGO Kontakttechnik GmbH
+# Author: Stefanie Meihöfer, WAGO GmbH
 #-----------------------------------------------------------------------------#
 
 . /etc/config-tools/board_specific_defines; . $(dirname $0)/${BOARD_ID}_commons

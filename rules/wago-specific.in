@@ -69,7 +69,6 @@ menuconfig PLC_CODESYS
 		Builds and installs the codesys runtime system.
 	
 if PLC_CODESYS
-source "generated/wago_specific_codesys_2.in"
 endif
 
 
@@ -105,9 +104,6 @@ menu "DAL - Device Abstraction Layer"
 source "generated/wago_specific_dal.in"
 endmenu
 
-menu "Demo                          "
-source "generated/wago_specific_demo.in"
-endmenu
 
 
 menu "Frontend config (web/console) " 

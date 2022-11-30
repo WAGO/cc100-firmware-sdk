@@ -4,7 +4,7 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 #
-# Copyright (c) 2018 WAGO Kontakttechnik GmbH & Co. KG
+# Copyright (c) 2018-2022 WAGO GmbH & Co. KG
 
 #
 # config_usb_gadget
@@ -63,7 +63,7 @@ config_base()
   (
     cd "$LANGUAGE"
     echo "$MAC" > serialnumber
-    echo "WAGO Kontakttechnik GmbH & Co. KG" > manufacturer
+    echo "WAGO GmbH & Co. KG" > manufacturer
     /etc/config-tools/get_typelabel_value SYSDESC > product
   )
 }

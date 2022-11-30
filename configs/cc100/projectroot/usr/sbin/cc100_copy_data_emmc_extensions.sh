@@ -6,16 +6,16 @@
 #
 # This file is part of PTXdist package wago-custom-install.
 #
-# Copyright (c) 2017-2018 WAGO Kontakttechnik GmbH & Co. KG
+# Copyright (c) 2017-2022 WAGO GmbH & Co. KG
 #-----------------------------------------------------------------------------#
 #-----------------------------------------------------------------------------#
 # Script:   pfcXXX_copy_data_emmc_extensions.sh
 #
 # Brief:    EMMC extension functions for pfcXXX_copy_data.sh.
 #
-# Author:   AGa: WAGO Kontakttechnik GmbH & Co. KG
-# Author:   PEn: WAGO Kontakttechnik GmbH & Co. KG
-# Author:   MLa: WAGO Kontakttechnik GmbH & Co. KG
+# Author:   AGa: WAGO GmbH & Co. KG
+# Author:   PEn: WAGO GmbH & Co. KG
+# Author:   MLa: WAGO GmbH & Co. KG
 #-----------------------------------------------------------------------------#
 
 function reformat_emmc
@@ -68,7 +68,7 @@ function reformat_emmc_gpt
         -p ${emmc_card_device} && \
         sgdisk -A 5:set:2 ${emmc_card_device} && \
         sgdisk -A 8:set:2 ${emmc_card_device} && \
-        partprobe ${emmc_card_device} && \
+        update_partition_info ${emmc_card_device} && \
         mkfs.vfat ${emmc_card_device}p2 -n "BOOT" -i 7761676F && \
         mkfs.ext4 -F -L "log_backup" ${emmc_card_device}p3 && \
         mkfs.ext4 -F -L "settings" ${emmc_card_device}p4 && \
@@ -76,7 +76,7 @@ function reformat_emmc_gpt
         mkfs.ext4 -F -L "home1" ${emmc_card_device}p6 && \
         mkfs.ext4 -F -L "home2" ${emmc_card_device}p7 && \
         mkfs.ext4 -F -L "rootfs.2" ${emmc_card_device}p8 && \
-        partprobe ${emmc_card_device} && \
+        update_partition_info ${emmc_card_device} && \
         status="${SUCCESS}"
 
     fi

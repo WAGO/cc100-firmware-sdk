@@ -161,10 +161,10 @@ ifdef PTXCONF_CDS3_RTS_FEATURE_TARGETVISU
 endif
 
 ifdef PTXCONF_ELREST_CUSTOM_CDS3_LIBS_INSTALL
-	@$(call install_alternative, elrest-custom-install, 0, 0, 0750, /usr/lib/libCmpSQLite.so.2.0.1)
-	@$(call install_link, elrest-custom-install, ./libCmpSQLite.so.2.0.1, /usr/lib/libCmpSQLite.so.2)
-	@$(call install_link, elrest-custom-install, ./libCmpSQLite.so.2.0.1, /usr/lib/libCmpSQLite.so)
-	@$(call install_link, elrest-custom-install, ../libCmpSQLite.so.2.0.1, /usr/lib/cds3-custom-components/libCmpSQLite.so)
+	@$(call install_alternative, elrest-custom-install, 0, 0, 0750, /usr/lib/libCmpSQLite.so.2.0.8)
+	@$(call install_link, elrest-custom-install, ./libCmpSQLite.so.2.0.8, /usr/lib/libCmpSQLite.so.2)
+	@$(call install_link, elrest-custom-install, ./libCmpSQLite.so.2.0.8, /usr/lib/libCmpSQLite.so)
+	@$(call install_link, elrest-custom-install, ../libCmpSQLite.so.2.0.8, /usr/lib/cds3-custom-components/libCmpSQLite.so)
 endif
 
 ifdef PTXCONF_START_MICROBROWSER
@@ -200,6 +200,7 @@ ifdef PTXCONF_ELREST_CUSTOM_CONFIG_FILES_INSTALL
 	@$(call install_alternative, elrest-custom-install, 0, 0, 0754, /etc/script/start_panel.sh)
 	@$(call install_alternative, elrest-custom-install, 0, 0, 0754, /etc/script/start_wbm.sh)
 	@$(call install_alternative, elrest-custom-install, 0, 0, 0754, /etc/script/start_webbrowser.sh)
+	@$(call install_alternative, elrest-custom-install, 0, 0, 0754, /etc/script/show_webbrowser.sh)
 	@$(call install_alternative, elrest-custom-install, 0, 0, 0754, /etc/script/activate_browser_wnd.sh)
 	@$(call install_alternative, elrest-custom-install, 0, 0, 0755, /etc/rc.once.d/initial_webbrowser_focus)
 	@$(call install_alternative, elrest-custom-install, 0, 0, 0754, /etc/script/start_plclist.sh)

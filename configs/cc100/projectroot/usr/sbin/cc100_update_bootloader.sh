@@ -6,15 +6,15 @@
 #
 # This file is part of PTXdist package wago-custom-install.
 #
-# Copyright (c) 2015-2018 WAGO Kontakttechnik GmbH & Co. KG
+# Copyright (c) 2015-2018 WAGO GmbH & Co. KG
 #-----------------------------------------------------------------------------#
 #-----------------------------------------------------------------------------#
 # Script:   pfcXXX_update_bootloader.sh
 #
 # Brief:    Update script for PFC bootloaders.
 #
-# Author:   AGa: WAGO Kontakttechnik GmbH & Co. KG
-# Author:   PEn: WAGO Kontakttechnik GmbH & Co. KG
+# Author:   AGa: WAGO GmbH & Co. KG
+# Author:   PEn: WAGO GmbH & Co. KG
 #-----------------------------------------------------------------------------#
 
 
@@ -92,7 +92,8 @@ function backup_bootloader
     local system_index=$1
     local barebox_compatible_versions="$2"
     local bb_path="$3"
-    local dev_type="$4"
+    local tfa_path="$4"
+    local dev_type="$5"
     local result=0
 
     # Determine target ROOT FS device
@@ -131,6 +132,7 @@ function backup_bootloader
             result=$(( $? != 0 ? $INTERNAL_ERROR : 0 ))
             if [[ "$result" -eq "0" ]]; then
                 cp "$bb_path"* "$mount_point$loader_backup_destination"
+                cp "$tfa_path"* "$mount_point$loader_backup_destination"
                 result=$(( $? != 0 ? $INTERNAL_ERROR : 0 ))
             fi
             if [[ "$result" -eq "0" ]]; then
@@ -229,7 +231,7 @@ function __main
         echo "Restore bootloaders from backup at \"$base_path\""
     else
         # Backup bootloader to ROOT FS
-        backup_bootloader $system_index "$barebox_compatible_versions" "${bb_path}" "${dev_type}"
+        backup_bootloader $system_index "$barebox_compatible_versions" "${bb_path}" "${tfa_path}" "${dev_type}"
         if [[ "$?" -ne "0" ]]; then
             ReportError "Error: Unable to write bootloaders backup to system $system_index"
             exit $INTERNAL_ERROR

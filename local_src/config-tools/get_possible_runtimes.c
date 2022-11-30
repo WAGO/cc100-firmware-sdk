@@ -1,5 +1,5 @@
 //------------------------------------------------------------------------------
-/// Copyright (c) WAGO Kontakttechnik GmbH & Co. KG
+/// Copyright (c) WAGO GmbH & Co. KG
 ///
 /// PROPRIETARY RIGHTS are involved in the subject matter of this material.
 /// All manufacturing, reproduction, use and sales rights pertaining to this
@@ -10,11 +10,11 @@
 ///
 ///  \file     get_possible_runtimes.c
 ///
-///  \version  $Rev: 59631 $
+///  \version  $Rev: 68028 $
 ///
 ///  \brief    <Insert description here>
 ///
-///  \author   <author> : WAGO Kontakttechnik GmbH & Co. KG
+///  \author   <author> : WAGO GmbH & Co. KG
 //------------------------------------------------------------------------------
 #include <stdio.h>
 #include <unistd.h>
@@ -24,11 +24,13 @@
 
 #define CUSTOM   0x01
 #define CODESYS2 0x02
-#define CODESYS3 0x04
+#define ERUNTIME 0x04
+#define CODESYS3 0x08
 
 static const char * custom = "0";
+static const char * codesys3 = "1";
 static const char * codesys2 = "2";
-static const char * codesys3 = "3";
+static const char * eruntime = "3";
 static const char * true = "true";
 static const char * false = "false";
 
@@ -38,7 +40,7 @@ typedef struct {
   uint32_t runtime;
 }tOptions;
 
-static const char optlist[] = "e3c2u0jh";
+static const char optlist[] = "e3c2u1n0jh";
 
 //------------------------------------------------------------------------------
 static tOptions _ParseOptions(int argc, char ** argv)
@@ -59,6 +61,14 @@ static tOptions _ParseOptions(int argc, char ** argv)
         }
         ret.runtime = CUSTOM;
         break;
+      case 'n':
+      case '1':
+          if(ret.runtime)
+          {
+            ret.help = 1;
+          }
+          ret.runtime = CODESYS3;
+          break;
       case 'c':
       case '2':
           if(ret.runtime)
@@ -73,7 +83,7 @@ static tOptions _ParseOptions(int argc, char ** argv)
           {
             ret.help = 1;
           }
-          ret.runtime = CODESYS3;
+          ret.runtime = ERUNTIME;
           break;
       case 'j':
           ret.json = 1;
@@ -97,13 +107,14 @@ static void _Usage(void)
   puts("\n* get Possible Runtimes for this device*\n");
   puts("Usage: get_possible_runtimes [options]\n");
   puts("Calling without options returns all possible Runtimes");
-  puts("In this case retuen values are:\n0 (custom); 2 (codesys2) 3 (eruntime)\n");
-  puts("The Options -u, -0,-c, -2, -e and -3 are exclusive and result in true or false.\n");
+  puts("In this case return values are:\n0 (custom); 1 (codesys3) 2 (codesys2) 3 (eruntime)\n");
+  puts("The Options -u, -0, -n ,-1, -c, -2, -e and -3 are exclusive and result in true or false.\n");
   puts("options:");
   puts("  -j       print in json format");
-  puts("  -u or -0 is custom runtime posible");
+  puts("  -u or -0 is custom runtime possible");
+  puts("  -n or -1 is codesys3 runtime possible"); // n for native
   puts("  -c or -2 is codesys2 possible");
-  puts("  -e or -3 is eruntime posible\n");
+  puts("  -e or -3 is eruntime possible\n");
 }
 
 void jsonTrueFalse(const char * start,const char * key,uint32_t trueFalse,const char * end)
@@ -130,11 +141,14 @@ static void printTrueFalse(uint32_t runtime,uint32_t runtimeBits,uint8_t json)
       case CUSTOM:
         pRuntime = custom;
         break;
+      case CODESYS3:
+        pRuntime = codesys3;
+        break;
       case CODESYS2:
         pRuntime = codesys2;
         break;
-      case CODESYS3:
-        pRuntime = codesys3;
+      case ERUNTIME:
+        pRuntime = eruntime;
         break;
     }
     jsonTrueFalse("{",pRuntime,(runtimeBits & runtime),"}");
@@ -178,6 +192,15 @@ static void printRuntimes(uint32_t runtimeBits,uint8_t json)
       printf("%s",custom);
       havePrinted=1;
     }
+    if(runtimeBits & CODESYS3)
+    {
+      if(havePrinted)
+      {
+        printf(pDelimitter);
+      }
+      printf("%s",codesys3);
+      havePrinted=1;
+    }
     if(runtimeBits & CODESYS2)
     {
       if(havePrinted)
@@ -187,13 +210,13 @@ static void printRuntimes(uint32_t runtimeBits,uint8_t json)
       printf("%s",codesys2);
       havePrinted=1;
     }
-    if(runtimeBits & CODESYS3)
+    if(runtimeBits & ERUNTIME)
     {
       if(havePrinted)
       {
         printf(pDelimitter);
       }
-      printf("%s",codesys3);
+      printf("%s",eruntime);
       havePrinted=1;
 
     }
@@ -269,6 +292,25 @@ static uint32_t checkBlacklist(char * value)
   return blacklist;
 }
 
+static uint32_t checkCodesys3(void)
+{
+  uint32_t ret = 0;
+  char revisions[32];
+  FILE * fp = fopen("/etc/REVISIONS","r");
+  if(fp != NULL)
+  {
+    if (fread(revisions, 1, sizeof(revisions), fp) > 14)
+    {
+      if ((strstr(revisions,"FIRMWARE=04.") != NULL))  // FIRMWARE=04.xx.xx(xx)
+      {
+        ret = 1;
+      }
+    }
+    fclose(fp);
+  }
+  return ret;
+}
+
 int main(int argc,char *argv[])
 {
   tTypeLabel typelabel;
@@ -294,20 +336,29 @@ int main(int argc,char *argv[])
   cds3 = typelabel_OBJECT_GetValue(typelabel,"DEVICEID");
   typelabel_OBJECT_Destroy(typelabel);
 
-  if(   (cds2 != NULL)
-     && (0 != strtoul(cds2,NULL,0))
-     && (0 == checkBlacklist(cds2)))
+  if (cds2 != NULL)
   {
-    runtimeBits|=CODESYS2;
+	if (  (0 != strtoul(cds2,NULL,0))
+       && (0 == checkBlacklist(cds2)))
+    {
+      runtimeBits|=CODESYS2;
+    }
     free(cds2);
   }
 
-  if(   (cds3 != NULL)
-     && (0 != strtoul(cds3,NULL,0))
-     && (0 == checkBlacklist(cds3)))
+  if (cds3 != NULL)
   {
-    runtimeBits|=CODESYS3;
+    if (  (0 != strtoul(cds3,NULL,0))
+       && (0 == checkBlacklist(cds3)))
+    {
+      runtimeBits|=ERUNTIME;
+    }
     free(cds3);
+  }
+
+  if (checkCodesys3())
+  {
+    runtimeBits = CODESYS3 | CUSTOM;
   }
 
   if(opt.runtime)

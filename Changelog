@@ -1,3 +1,28 @@
+Firmware Release 04.01.10 (99)
+System:
+[FIXED] Backup&Restore: Backups created via the WBM can be used for restore.
+[FIXED] Firewall: Added option in WBM/Interface configuration to disable IO Check.
+[FIXED] Sporadic exception in Codesys application / IoDrvDal fixed.
+[FIXED] Restarts caused by multiple actuation of the operating mode switch fixed.
+
+Runtime System:
+[KNOWN] “PLC load watchdog” might not work as espected: the plc load watchdog will 
+        detect (e.g. an endless loop) but the IEC task might not be stopped in any
+        case. This might lead to a complete stop of the runtime process. As 
+        workaround and improve “hardening” of your IEC application we recommend
+        to use an IEC Task watchdog on all your relevant IEC tasks in your IEC application.
+
+Fieldbus Interface & Protocols:
+[NEW] The CC100 now supports the BACnet protocol.
+      WAGO BACnet Configurator Version 2.3 is required.
+
+Functional change:
+[-]
+
+Beta functionalities:
+[-]
+
+################################################################################
 Firmware Release 03.09.07 (99)
 
 System:

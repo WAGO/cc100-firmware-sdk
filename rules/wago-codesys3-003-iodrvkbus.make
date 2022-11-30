@@ -1,7 +1,7 @@
 ## -*-makefile-*-
 # $Id$
 #
-# Copyright (C) 2013 by Wago Kontakttechnik GmbH & Co. KG
+# Copyright (C) 2013-2022 by WAGO GmbH & Co. KG
 #
 # See CREDITS for details about who has contributed to this project.
 #
@@ -77,6 +77,8 @@ CDS3_IODRVKBUS_MAKE_ENV  := $(CROSS_ENV)
 
 #CDS3_IODRVKBUS_MAKE_OPT += "DBGMODE=-g3"
 #CDS3_IODRVKBUS_MAKE_OPT += "OPTIMIZE=-O3"
+
+CDS3_IODRVKBUS_MAKE_OPT += "DEP_CDS3_IODRVKBUS=$(PTXCONF_CDS3_IODRVKBUS)"
 
 
 $(STATEDIR)/cds3-iodrvkbus.compile:

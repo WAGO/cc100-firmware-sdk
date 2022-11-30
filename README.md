@@ -3,8 +3,7 @@
 # FIRMWARE FOR CC100
 
 # ..:: Attention ::.. 
-## Starting with firmware 20.1 you need to update the ptxdist buildsystem. 
-[Ptxdist-Buildsystem](https://github.com/WAGO/ptxdist)
+## Starting with firmware 23 only Codesys 3 will be supported.
 
 # Install WAGO-PFC-SDK on Ubuntu 16.04.5 (64bit) LTS
 

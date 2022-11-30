@@ -4,17 +4,17 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 #
-# Copyright (c) 2018-2019 WAGO Kontakttechnik GmbH & Co. KG
+# Copyright (c) 2018-2022 WAGO GmbH & Co. KG
 #-----------------------------------------------------------------------------#
 #-----------------------------------------------------------------------------#
 # Script:   firewall_apply.sh
 #
 # Brief:    Config tool to apply firewall rules for known services.
 #
-# Author:   MP:  WAGO Kontakttechnik GmbH & Co. KG
-# Author:   MOe: WAGO Kontakttechnik GmbH & Co. KG
-# Author:   OG:  WAGO Kontakttechnik GmbH & Co. KG
-# Author:   PEn: WAGO Kontakttechnik GmbH & Co. KG
+# Author:   MP:  WAGO GmbH & Co. KG
+# Author:   MOe: WAGO GmbH & Co. KG
+# Author:   OG:  WAGO GmbH & Co. KG
+# Author:   PEn: WAGO GmbH & Co. KG
 #-----------------------------------------------------------------------------#
 
 
@@ -42,24 +42,14 @@ firewall_get_service_state()
 
     case "$1" in
     codesysr)
-        running=$(/etc/config-tools/get_plc_config)
-        if [[ "2" == "$running" ]] ; then
-            local stater=$(/etc/config-tools/get_rts3scfg_value PLC DisableTcpIpProgramming)
-            [[ "NO" == "$stater" ]] && active=1
-        elif [[ "3" == "$running" ]] ; then
-            local active=1
+        if [[ 1 == "$(/etc/config-tools/get_plc_config)" ]]; then
+            active=1
         fi
         ;;
 
     codesysw)
-        local statew=" "
-        running=$(/etc/config-tools/get_plc_config)
-        if [[ "2" == "$running" ]] ; then
-            statew=$(/etc/config-tools/get_port_state codesys-webserver)
-            [[ "enabled" == "$statew" ]] && active=1
-        elif [[ "3" == "$running" ]] ; then
-            statew=$(/etc/config-tools/get_port_state codesys3-webserver)
-            [[ "enabled" == "$statew" ]] && active=1
+        if [[ "enabled" == "$(/etc/config-tools/get_port_state codesys3-webserver)" ]]; then
+            active=1
         fi
         ;;
 
@@ -134,22 +124,6 @@ firewall_get_service_state()
         fi
         ;;
 
-    modbus_tcp)
-        #we need sudo priviliges here, otherwise modbus_config will fail
-        running=$(sudo /etc/config-tools/modbus_config get tcp enabled)
-        if [[ "true" == "$running" ]] ; then
-            active=1
-        fi
-        ;;
-
-    modbus_udp)
-        #we need sudo priviliges here, otherwise modbus_config will fail
-        running=$(sudo /etc/config-tools/modbus_config get udp enabled)
-        if [[ "true" == "$running" ]] ; then
-            active=1
-        fi
-        ;;
-
     snmp)
         running=$(/etc/config-tools/get_port_state snmp)
         if [[ "enabled" == "$running" ]] ; then
@@ -185,21 +159,16 @@ firewall_get_service_state()
         ;;
 
     opcua)
-        if [[ ! -f "/etc/config-tools/config-opcua" ]] ; then
-            running=$(/etc/config-tools/config_opcua state)
+        if [[ -x "/etc/config-tools/config_opcua" ]]; then
+		    running=$(/etc/config-tools/config_opcua state)
             if [[ "enabled" == "$running" ]] ; then
                 active=1
             fi
-        else
-            running=$(/etc/config-tools/config-opcua --get=\"state\")
-            if [ "{\"state\":\"enable\"}" == "$running" ] ; then
-                active=1
-            fi
-        fi
+		fi
         ;;
 
     bacnet)
-        if [[ -f "/etc/config-tools/bacnet_config" ]]; then
+        if [[ -x "/etc/config-tools/bacnet_config" ]]; then
             running=$(/etc/config-tools/bacnet_config -g config-state)
             if [[ "true" == "$running" ]] ; then
                 active=1

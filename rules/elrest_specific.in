@@ -4,9 +4,6 @@ menu "Tools                         "
 source "generated/elrest_specific_tools.in"
 endmenu
 
-menu "Drivers                       "
-source "generated/elrest_specific_drivers.in"
-endmenu
 
 menu "Applications                  "
 source "generated/elrest_specific_applications.in"

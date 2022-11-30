@@ -1,8 +1,0 @@
-## SECTION=elrest_specific_drivers
-
-config DIN_SPI_DRV
-	tristate
-	select KERNEL
-	prompt "din_spi_drv"
-	help
-	  FIXME

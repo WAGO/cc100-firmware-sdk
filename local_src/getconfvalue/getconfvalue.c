@@ -3,13 +3,13 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 //
-// Copyright (c) 2019 WAGO Kontakttechnik GmbH & Co. KG
+// Copyright (c) 2019-2022 WAGO GmbH & Co. KG
 //------------------------------------------------------------------------------
 ///------------------------------------------------------------------------------
 ///
 ///  \file    getconfvalue.c
 ///
-///  \version $Id: getconfvalue.c 43946 2019-10-23 11:10:18Z wrueckl_elrest $
+///  \version $Id: getconfvalue.c 65689 2022-03-11 14:37:43Z falk.werner@wago.com $
 ///
 ///  \brief   get value from *.conf file 
 ///

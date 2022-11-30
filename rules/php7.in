@@ -26,6 +26,7 @@ menuconfig PHP7
 	select LIBPNG		if PHP7_EXT_GD
 	select LIBJPEG		if PHP7_EXT_GD
 	select LIBGD		if PHP7_EXT_GD
+	select LIBGD_XPM    if PHP7_EXT_GD
 
 if PHP7
 

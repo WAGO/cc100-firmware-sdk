@@ -1,0 +1,86 @@
+From 9a8dc03fa4938a84d4325bf408c59112c0cba287 Mon Sep 17 00:00:00 2001
+From: Tomas Marek <marek_tomas@centrum.cz>
+Date: Thu, 15 Sep 2022 08:58:01 +0200
+Subject: [PATCH] drivers: gpio_keys: revert commit
+ 3b5ecebfba51281287dff0a584d9e9949561701b
+
+The input event handling use the spin_lock_irqsave() function:
+
+gpio_keys_debounce_event()
+	input_sync()
+		input_event()
+			spin_lock_irqsave()
+			...
+			spin_unlock_irqrestore()
+
+The spin_lock_irqsave() might result in "BUG: scheduling while atomic"
+error if full RT preemption is enabled (CONFIG_PREEMPT_RT=y):
+
+[  151.102774] BUG: scheduling while atomic: omsd/386/0x00010002
+[  151.102813] Modules linked in:
+[  151.102828] Preemption disabled at:
+[  151.102833] [<c014b260>] preempt_count_add+0xe0/0xfc
+[  151.102871] CPU: 0 PID: 386 Comm: omsd Not tainted 5.15.19-rt29-01272-gcb06dc21e0c6-dirty #3
+[  151.102889] Hardware name: Generic DT based system
+[  151.102899] Backtrace:
+...
+[  151.103055] [<c014b620>] (__schedule_bug) from [<c08e3284>] (__schedule+0x74/0x698)
+[  151.103090]  r5:c2f78840 r4:dfb46b80
+[  151.103096] [<c08e3210>] (__schedule) from [<c08e38d0>] (schedule_rtlock+0x28/0x4c)
+[  151.103137]  r10:c2e3a170 r9:c34af814 r8:c1065280 r7:c34af808 r6:c34ae000 r5:ffffe000
+[  151.103147]  r4:c34ae000
+[  151.103153] [<c08e38a8>] (schedule_rtlock) from [<c08e822c>] (rtlock_slowlock_locked+0x580/0x948)
+[  151.103197] [<c08e7cac>] (rtlock_slowlock_locked) from [<c08e8644>] (rt_spin_lock+0x50/0x68)
+[  151.103243]  r10:200b0193 r9:00000023 r8:c2e3a170 r7:00000000 r6:00000003 r5:a00b0193
+[  151.103252]  r4:c2e3a170
+[  151.103258] [<c08e85f4>] (rt_spin_lock) from [<c062e1f0>] (input_event+0x40/0x60)
+[  151.103293]  r5:00000001 r4:c2e3a000
+[  151.103299] [<c062e1b0>] (input_event) from [<c0632290>] (gpio_keys_gpio_report_event+0x7c/0x9c)
+[  151.103339]  r9:00000023 r8:00000000 r7:c2936ab4 r6:c2e3a000 r5:00000001 r4:c16789e0
+[  151.103346] [<c0632214>] (gpio_keys_gpio_report_event) from [<c06330a0>] (gpio_keys_debounce_timer+0x18/0x28)
+[  151.103385]  r7:c1678a50 r6:00000000 r5:dfb44818 r4:c1678a50
+[  151.103392] [<c0633088>] (gpio_keys_debounce_timer) from [<c018d5f0>] (__hrtimer_run_queues+0xf8/0x1d4)
+[  151.103427]  r5:dfb44818 r4:dfb447c0
+[  151.103434] [<c018d4f8>] (__hrtimer_run_queues) from [<c018e4fc>] (hrtimer_interrupt+0xd8/0x23c)
+[  151.103473]  r10:00000003 r9:c34ae000 r8:7fffffff r7:ffffffff r6:2e453803 r5:200b0193
+[  151.103483]  r4:dfb447c0
+[  151.103488] [<c018e424>] (hrtimer_interrupt) from [<c06935bc>] (arch_timer_handler_virt+0x30/0x38)
+...
+---
+ drivers/input/keyboard/gpio_keys.c | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/drivers/input/keyboard/gpio_keys.c b/drivers/input/keyboard/gpio_keys.c
+index 2cf07486b05f..ccdec1820ae4 100644
+--- a/drivers/input/keyboard/gpio_keys.c
++++ b/drivers/input/keyboard/gpio_keys.c
+@@ -438,7 +438,7 @@ static irqreturn_t gpio_keys_gpio_isr(int irq, void *dev_id)
+ 	if (bdata->debounce_use_hrtimer) {
+ 		hrtimer_start(&bdata->debounce_timer,
+ 			      ms_to_ktime(bdata->software_debounce),
+-			      HRTIMER_MODE_REL_HARD);
++			      HRTIMER_MODE_REL);
+ 	} else {
+ 		mod_delayed_work(system_wq,
+ 				 &bdata->work,
+@@ -595,7 +595,7 @@ static int gpio_keys_setup_key(struct platform_device *pdev,
+ 		INIT_DELAYED_WORK(&bdata->work, gpio_keys_gpio_work_func);
+ 
+ 		hrtimer_init(&bdata->debounce_timer,
+-			     CLOCK_REALTIME, HRTIMER_MODE_REL_HARD);
++			     CLOCK_REALTIME, HRTIMER_MODE_REL);
+ 		bdata->debounce_timer.function = gpio_keys_debounce_timer;
+ 
+ 		isr = gpio_keys_gpio_isr;
+@@ -668,7 +668,7 @@ static int gpio_keys_setup_key(struct platform_device *pdev,
+ 		irqflags |= IRQF_SHARED;
+ 
+ 	error = devm_request_any_context_irq(dev, bdata->irq, isr, irqflags |
+-					     IRQF_NO_THREAD, desc,
++					     IRQF_THREAD_TBL_LOOKUP, desc,
+ 					     bdata);
+ 	if (error < 0) {
+ 		dev_err(dev, "Unable to claim irq %d; error %d\n",
+-- 
+2.17.1
+

@@ -1,7 +1,7 @@
 # -*-makefile-*-
 # $Id$
 #
-# Copyright (C) 2013 by Wago Kontakttechnik GmbH & Co. KG
+# Copyright (C) 2013 by WAGO GmbH & Co. KG
 #
 # See CREDITS for details about who has contributed to this project.
 #
@@ -14,7 +14,7 @@
 #
 PACKAGES-$(PTXCONF_CDS3_TSCIODRVCC100) += cds3-tsciodrvcc100
 
-CDS3_TSCIODRVCC100_VERSION   := 1.0.5
+CDS3_TSCIODRVCC100_VERSION   := 1.0.6
 CDS3_TSCIODRVCC100           := TscIoDrvCC100
 CDS3_TSCIODRVCC100_DIR       := $(BUILDDIR)/$(CDS3_TSCIODRVCC100)
 CDS3_TSCIODRVCC100_URL       := file://$(PTXDIST_WORKSPACE)/wago_intern/codesys3-Component/$(CDS3_TSCIODRVCC100)

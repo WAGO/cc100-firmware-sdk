@@ -5,6 +5,7 @@
 #include "DynamicIPClientFactory.hpp"
 #include "IDynamicIPClientAdministrator.hpp"
 
+
 #include <string>
 
 
@@ -12,7 +13,7 @@ namespace netconf {
 
 class DynamicIPClientAdministrator : public IDynamicIPClientAdministrator {
  public:
-  DynamicIPClientAdministrator(const ::std::string& vendorclass);
+  DynamicIPClientAdministrator(::std::string vendorclass);
   virtual ~DynamicIPClientAdministrator() = default;
 
   DynamicIPClientAdministrator(const DynamicIPClientAdministrator &other) = delete;
@@ -23,10 +24,12 @@ class DynamicIPClientAdministrator : public IDynamicIPClientAdministrator {
   IDynamicIPClientPtr AddClient(DynamicIPType type, const ::std::string &itf_name, const ::std::string &hostname) override;
   void DeleteClient(const ::std::string &itf_name) override;
   IDynamicIPClientPtr GetClient(const ::std::string &itf_name) const override;
+  
   void RestartAllClients(const ::std::string& hostname) override;
-
+  Status SetClientIDAndRestartAllClients(::std::string client_id) override;
  private:
   ::std::string vendorclass_;
+  ::std::string client_id_;
 
   DynamicIPClientFactory factory_;
   IDynamicIPClients clients_;
