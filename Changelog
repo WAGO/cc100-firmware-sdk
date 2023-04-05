@@ -1,3 +1,25 @@
+Firmware Release 04.02.13 (24)
+
+System:
+[FIXED] Fixed a problem related to the dnsmasq DHCP server that resulted in
+        no connection over USB when using a cloned SD card.
+
+Runtime System:
+[FIXED] “PLC load watchdog” might not work as espected: the plc load watchdog
+        will detect (e.g. an endless loop) but the IEC task might not be stopped
+        in any case. This might lead to a complete stop of the runtime process.
+        As workaround and improve “hardening” of your IEC application we recommend
+        to use an IEC Task watchdog on all your relevant IEC tasks in your IEC
+        application.
+[FIXED] CC100: Process image values in first cycle after power off / on.
+[FIXED] CC100: Output stateLED and controlbyte differs.
+
+Web Based Management:
+[FIXED] In WBM it is not possible to start a restore of the system package if the
+        device has booted from the memory card.
+
+################################################################################
+
 Firmware Release 04.01.10 (99)
 System:
 [FIXED] Backup&Restore: Backups created via the WBM can be used for restore.

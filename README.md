@@ -5,14 +5,18 @@
 # ..:: Attention ::.. 
 ## Starting with firmware 23 only Codesys 3 will be supported.
 
-# Install WAGO-PFC-SDK on Ubuntu 16.04.5 (64bit) LTS
+# Install WAGO-CC100-SDK using docker
 
-This HowTo describes steps to install the Software-Development-Kit (SDK) for cc100 on Ubuntu16.04
+This HowTo describes how to use the Software-Development-Kit (SDK) for the CC100 based on docker.
+
+All steps up to 3.1) need a connection to the internet. The build can be done without a network connection.
+
+The cc100-builder image comes with a ready to use toolchain and the build tool ptxdist. In order to simplify the interaction with docker and ptxdist we provide a make [wrapper](##make-wrapper) including all steps to create CC100 firmware images and beyond.
 
 The start into the embedded linux world requires substantial technical know-how to have success. 
 Therefore WAGO recommends familiarity with the following topics for the future embedded linux developer:
 - Linux-OS
-- working on command line interface(CLI)
+/- working on command line interface(CLI)
 - writing Makefile, C or C++ code, shell-scripts.
 - Cross-Platform-Development.
 
@@ -22,263 +26,78 @@ Helpful when heard about:
 - ARM architecture
 - Bootloader
 
-We will provide ’ready to use’ toolchains in a binary manner, which saves a lot of time and headaches.
-This document describes the installation and usage of the binary toolchain.
+## PREREQUISITES
 
-The advantages of the ready to use toolchain have to be paid with some dependencies,
-which make a uniquely defined host environment mandatory. Ubuntu 16.04 (64bit) fits these requirements,
-others may or may not.
-
-# PREREQUISITES
-
-# Installation and building STEP-BY-STEP:
-
-## 0.) Download and setup a virtual or physical Ubuntu 16.04.5 LTS 64bit machine from scratch
-You can download the Ubuntu-Iso directly form their website: http://releases.ubuntu.com/16.04/
-
-```
-Is Ubuntu 16.04 LTS still supported?
-
-Yes, Ubuntu 16.04 LTS is supported until 2024 through
-Canonical’s Extended Security Maintenance (ESM) product.
-Xenial enters the ESM period in April 2021, with security
-patches provided for an additional three years beyond the 
-traditional five-year standard support.
-https://ubuntu.com/16-04
-```
-
-**Make sure if you like to use the precompiled toolchain that you use the Ubuntu-64bit variant.**
-
-A minimal disk space of 25GB is required. We recommend 50GB.
-> For virtual machines on windows x64 hosts:
-You may enable virtualization support(Intel VT-x or AMD-V), typical turned on in BIOS or UEFI.
-
-## 1.) Before you clone the repository !!!
-
-Due to the fact that the repository contains files over 50MB you need the **GIT large file support** extension for GIT before you clone the repository.
-
-### 1.1) Download and install GIT
-
+### 1.) Download and install GIT
 Make sure that you install GIT version >= 1.8.2
 
-_The recommended Ubuntu version will meet the requirement!_
+    sudo apt install git
 
-```
-    >sudo apt install git
-```
+### 2.) Install git-lfs (large file support)
+Due to the fact that the repository contains files over 50MB you need the **GIT large file support** extension for GIT before you clone the repository.
 
-### 1.2) Install git-lfs (large file support)
+    sudo apt install git-lfs && git lfs install
 
-Please refer to this link to get detailed information about the installation on other systems:
-https://github.com/git-lfs/git-lfs/wiki/Installation
+### 3.) Install docker 
+Make sure that docker and make are installed on the host system.  
+To install docker, please refer to the instructions depending on your host system, e.g for Ubuntu use [https://docs.docker.com/install/linux/docker-ce/ubuntu/](https://docs.docker.com/install/linux/docker-ce/ubuntu/).
 
-These steps will only concentrate on the recommented Ubuntu version:
-```
-    >sudo apt install software-properties-common curl
-    >sudo add-apt-repository ppa:git-core/ppa
-    >curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | sudo bash
-      Detected operating system as Ubuntu/xenial.
-      Checking for curl...
-      Detected curl...
-      Checking for gpg...
-      Detected gpg...
-      Running apt update... done.
-      Installing apt-transport-https... done.
-      Installing /etc/apt/sources.list.d/github_git-lfs.list...done.
-      Importing packagecloud gpg key... done.
-      Running apt update... done.
+Make sure docker can be run without root privileged. Refer to [https://docs.docker.com/engine/install/linux-postinstall/](https://docs.docker.com/engine/install/linux-postinstall/) for further information.
 
-      The repository is setup! You can now install packages.
-    >sudo apt install git-lfs
-    >git lfs install
-```
+### 4.) Install make
 
+    sudo apt install make
 
-### 1.3) Now we are able to clone the repository.
-```
-    >cd ~
-    >mkdir -p wago/ptxproj/
-    >cd wago/ptxproj/
-    >git clone https://github.com/WAGO/cc100-firmware-sdk.git .
-```
+### 5.) Optional: Build the sdk-builder image manually.
 
-## 2.) Install "cross toolchain"
-We will provide a ’ready to use’ toolchain in a binary manner.
-To install the binary toolchain act as follows:
+The cc100-builder image bases on the sdk-builder image defined in [https://github.com/WAGO/sdk-builder](https://github.com/WAGO/sdk-builder). Docker will pull the corresponding base image during the build process. 
 
-### 2.1) Clone toolchain to /opt directory
-We need to clone the pre-compiled toolchain archive to the storage directory. We expect **/opt**
-```
-    >sudo mkdir -p /opt/gcc-Toolchain-2019.12/
-    >sudo git clone https://github.com/WAGO/gcc-toolchain-2019.12-precompiled.git /opt/gcc-Toolchain-2019.12/
-```
->After that the cross toolchain is located into folder: /opt/gcc-Toolchain-2019.12/arm-linux-gnueabihf/bin/
+If you prefer to build the sdk-builder image manually follow instruction provided in the [repository](https://github.com/WAGO/sdk-builder) description. Pay attention to the sdk-builder version as each fw release is bound to exactly one sdk-builder release. 
 
-If you are interested in the sources of the toolchain take a look at:
-```
-http://www.github.com/wago/gcc-toolchain-2019.12
-```
+## Installation and building STEP-BY-STEP:
 
-## 3.) Get, configure, build and install the build tool "ptxdist"(as normal user)
+### 1.) Check out the correct release
+We provide one tag for each firmware(FW) release. You can download specific FW versions in the release section. Alternatively you may use git to clone the repository.  
 
-### 3.1) Install additional required packages for "Ubuntu16.04":
-```
-    >sudo apt install libncurses5-dev
-    >sudo apt install gawk
-    >sudo apt install flex
-    >sudo apt install bison
-    >sudo apt install texinfo
-    >sudo apt install python-dev
-    >sudo apt install g++
-    >sudo apt install dialog
-    >sudo apt install libc6-dev
-    >sudo apt install lzop       #used to build kernel image, ./configure did not check if installed
-    >sudo apt install autoconf   #used to build kernel image, ./configure did not check if installed
-    >sudo apt install libtool    #used to build kernel image, ./configure did not check if installed
-    >sudo apt install xmlstarlet #used to build led_server package, ./configure did not check if installed
-    >sudo apt install xsltproc   #used to build led_server package, ./configure did not check if installed
-    >sudo apt install doxygen    #used to build modular-config-tools package, ./configure did not check if installed
-    >sudo apt install autopoint  #used to build libmodbus_tglx package
-    >sudo apt install python3-setuptools  #used to build host-system-python3
-```
+    git clone git@github.com:WAGO/cc100-firmware-sdk.git && cd cc100-firmware-sdk
 
-or in one-shot:
+Afterward you can checkout a specific release.
 
-```
-    >sudo apt install libncurses5-dev gawk flex bison texinfo python-dev g++ dialog libc6-dev lzop autoconf libtool xmlstarlet xsltproc doxygen autopoint python3-setuptools
-```
+    git checkout <fw release>   
 
-### 3.2) Clone the build tool "ptxdist" somewhere, we expect ~/ptxdist
-```
-    >git clone http://github.com/wago/ptxdist.git ~/ptxdist
-```
-### 3.3) Configure build enviroment tool "ptxdist"
-```
-    >cd ~/ptxdist
-    >./configure
-```
-The output looks like this:
+### 2.) Create docker image cc100-builder
 
-    checking build system type... x86_64-unknown-linux-gnu
-    checking host system type... x86_64-unknown-linux-gnu
-    checking for ptxdist patches... yes
-    checking for gcc... gcc
-    checking whether the C compiler works... yes
-    checking for C compiler default output file name... a.out
-    checking for suffix of executables... 
-    checking whether we are cross compiling... no
+    make builder
 
-    ....
+### 3.) Initialize PTXdist project in ptxproj directory 
 
-    checking for gunzip... /bin/gunzip
-    checking for mktemp... /bin/mktemp
-    checking for wget... /usr/bin/wget
-    checking find version... 4.4.2
-    checking for gmake... no
-    checking for gnumake... no
-    checking for make... /usr/bin/make
-    checking for file... /usr/bin/file
-    checking for msgfmt... /usr/bin/msgfmt
-    checking for gcc... /usr/bin/gcc
-    checking for python2.7... /usr/bin/python2.7
-    checking whether /usr/bin/python2.7 finds distutils... yes
-    checking whether python development files are present... yes
-    checking for patch... /usr/bin/patch
-    checking whether /usr/bin/patch will work... yes
+    make init
 
-    configure: creating ./config.status
-    config.status: creating Makefile
+Alternatively you can also run cc100-builder in bash mode (```make bash```) and enter the following commands.
 
-    ptxdist version 2017.11.1 configured.
-    Using '/usr/local' for installation prefix.
+    ptxdist select configs/cc100/ptxconfig_generic && \ 
+    ptxdist platform configs/cc100/platformconfig && \      
+    ptxdist toolchain /opt/gcc-Toolchain-2022.02/LINARO.Toolchain-2022.02/arm-linux-gnueabihf/bin/ && \
+    ptxdist clean -q
+    
+#### 3.1) Get and download all packages
 
-    Report bugs to ptxdist@pengutronix.de
+This step is optional, step 4.) includes this one. But using this step, everything that follows can be done without a connection to the internet.
 
->If "configure" fails, install missing packages and run configure again.
+    make get
 
-### 3.4) Build the build environment tool "ptxdist"
-```
-    >cd ~/ptxdist
-    >make
-```
+Alternatively you can also run pfc-builder in bash mode (```make bash```) and enter the following command.
 
-The output looks like this:
+    ptxdist get -q
 
-    building conf and mconf ...
-    make[1]: Betrete Verzeichnis '/home/wago/Downloads/ptxdist-2013.03.0/scripts/kconfig'
-    ...
-    gcc -g -O2  -DCURSES_LOC="<curses.h>" -DKBUILD_NO_NLS -DPACKAGE='"ptxdist"' -DCONFIG_='"PTXCONF_"' -c nconf.gui.c -o nconf.gui.o
-    gcc nconf.o zconf.tab.o nconf.gui.o  -o nconf -lncurses -lmenu -lpanel
-    make[1]: Verlasse Verzeichnis '/home/wago/Downloads/ptxdist-2013.03.0/scripts/kconfig'
-    done.
-    preparing PTXdist environment ... done
+### 4.) Build all packages
 
-### 3.5) Install the build environment tool "ptxdist"
-```
-    >cd ~/ptxdist
-    >sudo make install
-```
+    make build
 
->Default setup installs build environment to folder: /usr/local/lib/ptxdist-2017.11.1/bin/ptxdist
->
->Default setup also creates a sym-link to it in: /usr/local/bin/ptxdist
+Alternatively you can also run cc100-builder in bash mode (```make bash```) and enter the following command.
 
----
+    ptxdist go -q
 
-## 4) Configure the "project environment"
-
-### 4.1) Select "software config" we want to build
-```
-    >cd ~/wago/ptxproj
-    >ptxdist select configs/cc100/ptxconfig_generic
-    info: selected ptxconfig:
-        'configs/cc100/ptxconfig_generic'
-```
-
-### 4.2) Select "hardware platform" to dial with
-```
-    >cd ~/wago/ptxproj
-    >ptxdist platform configs/cc100/platformconfig
-     info: selected platformconfig:
-           'configs/cc100/platformconfig'
-
-     info: insufficient information in your platformconfig file
-           please use 'ptxdist toolchain </path/to/toolchain>' to select your toolchain
-```
-
-### 4.3) Select "toolchain" to use
-```
-    >cd ~/wago/ptxproj
-    >ptxdist toolchain /opt/gcc-Toolchain-2019.12/arm-linux-gnueabihf/bin/
-    found and using toolchain:
-    'ptxdist toolchain /opt/gcc-Toolchain-2019.12/arm-linux-gnueabihf/bin/'
-```
-
-### 4.4) Enter the main menu dialog once
-```
-    >cd ~/wago/ptxproj
-    >ptxdist menu
-```
-```
-    Leave dialog with [Exit]
-```
-
-### 4.5) Open the menuconfig dialog once
-```
-    >cd ~/wago/ptxproj
-    >ptxdist menuconfig
-```
-```
-    Leave dialog with [Exit]
-```
-
-## 5) Build the firmware image file "sd.hdimg"
-
-### 5.1) Compile all packages of cc100 firmware
-```
-        >cd ~/wago/ptxproj
-        >ptxdist go -q
-```
 ```
     started : ethtool.get
     finished: ethtool.get
@@ -294,36 +113,55 @@ The output looks like this:
     ...
 ```
 >__Now it's probably time to go home for the day.
->Even on reasonably fast machines the time to build the cc100 
+>Even on reasonably fast machines the time to build the CC100 
 >firmware takes from 30 minutes up to a few hours.
 >Another possibility is to read "How to become a PTXdist Guru"
 >http://public.pengutronix.de/software/ptxdist/appnotes/
 >in the meantime.__
 
-### 5.2) Build cc100 firmware image "sd.hdimg"
-```
-    >cd ~/wago/ptxproj
-    >ptxdist images
-```
+### 5.) Create SD card image
+
+Note that the SD card image is also provided in the release section for each FW. To generate those images run:
+
+    make images
+
+Alternatively you can also run cc100-builder in bash (```make bash```) mode and enter the following command.
+
+    ptxdist images -q
+
 Afterwards you should find the firmware image "sd.hdimg" in folder
-   **~/wago/ptxproj/platform-cc100/images/ .**
+   **~/ptxproj/platform-cc100/images/ .**
 
+#### 5.1) Create Wago Update Package (WUP)
+It is possible to create the WUP for an easier update of the firmware via ethernet. To generate the WUP run:
 
-## 6.) Write the binary image file "sd.hdimg" to SD-Card
+    make wup
 
-### 6.1) Virtual machine on a windows host
+   Alternatively you can also run pfc-builder in bash (```make bash```) mode and enter the following command.
+   
+    make wup
+    
+Documentation on how to use the WUP can be found in the pfc manual (12.2.1): [https://www.wago.com/de/sps/controller-pfc200/p/750-8212#downloads](https://www.wago.com/de/sps/controller-pfc200/p/750-8212#downloads).
 
-When working in a virtual machine on a windows host and you don't feel
-familar or save using dd on the virtual machine. Just follow the follwing steps:
+RAUC uses a certificate based approach to authenticate the origin of a bundle. To ease creating of WUP files during development, the BSP contains test certificates. In order to use RAUC's authentication mechanism to ensure the origin of a bundle, it is stricly recommended to to use custom certificates. A HowTo for this can be found here: [https://github.com/WAGO/pfc-howtos/tree/master/HowTo_GenerateWUPFile](https://github.com/WAGO/pfc-howtos/tree/master/HowTo_GenerateWUPFile).
+
+### 6.) Write the binary image file "sd.hdimg" to SD-Card
+
+ATTENTION: Size of generated 'sd.hdimg' has been changed to 204MB.
+
+#### 6.1) Virtual machine on a windows host
+
+If you are working in a virtual machine on a windows host and you feel
+unsafe using dd on the virtual machine just follow the follwing steps:
 - Copy firmware image "sd.hdimg" to your windows host
 - Download, install and use "Win32 Disk imager.exe"...
 
-### 6.2) For physical Ubuntu16 hosts follow the next steps.
+#### 6.2) For physical Ubuntu hosts follow the next steps.
 
 - Disable desktops "automount-open" feature
 ```
-    >gsettings set org.gnome.desktop.media-handling automount true
-    >gsettings set org.gnome.desktop.media-handling automount-open false
+    gsettings set org.gnome.desktop.media-handling automount true && \
+    gsettings set org.gnome.desktop.media-handling automount-open false
 ```
 
 - Identify SD-Card \
@@ -342,29 +180,29 @@ In this example we will identify **/dev/sde** as out sd card device.
 ```
 - Copy "sd.hdimg" to SD-Card
 ```
-    >cd <workspace>/ptxproj/platform-cc100/images
+    cd <workspace>/ptxproj/platform-cc100/images
 ```
 Identify your sd card device, this will be needed as parameter for dd. 'of=[/dev/[sd card device].`\
 We will use /dev/sde for example.
 ```
     >sudo dd if=sd.hdimg of=/dev/sde 
     [sudo] password for <user>:
-    1126400+0 Datensätze ein
-    1126400+0 Datensätze aus
-    576716800 bytes (577 MB, 550 MiB) copied, 8,21052 s, 70.2 MB/s
+    399360+0 Datasets in
+    399360+0 Datasets out
+    204427320 Bytes (204 MB) copied, 73.5553 s, 2.8 MB/s
 ```
 
-## 7.) Boot cc100 with custom image "sd.hdimg" on SD-Card
-cc100 boot device order checks SD-Card slot before internal memory.\
-By default, cc100 tries to find a DHCP-Server to retrieve an IP-Address.
+### 7.) Boot CC100 with custom image "sd.hdimg" on SD-Card
+CC100 boot device order checks SD-Card slot before internal NAND.\
+By default, CC100 tries to find a DHCP-Server to retrieve an IP-Address.
 
-1. PowerOff cc100
+1. PowerOff CC100
 2. Insert SD-Card with custom-image
-3. PowerOn cc100
+3. PowerOn CC100
 
-## 8.) Default settings for cc100
+### 8.) Default settings for CC100
 
-### 8.1) User accounts (usr/pwd):
+#### 8.1) User accounts (usr/pwd):
 
 | User  | Password |
 |-------|----------|
@@ -372,21 +210,21 @@ By default, cc100 tries to find a DHCP-Server to retrieve an IP-Address.
 | admin | wago |
 | user  | user |
 
-### 8.2) Hostname 
-__"PFCx00-uvwxyz"__ \
+#### 8.2) Hostname 
+__"CC100-uvwxyz"__ \
 Where 'uvwxyz' is the last part of eth0's MAC-ID in capital letters.
 
-### 8.3) Network Interfaces X1, X2: "br0"(Default)
+#### 8.3) Network Interfaces X1, X2: "br0"(Default)
 - Operate in "switched-mode"
 - DHCP-Client request dynamic Ip-Address from DHCP Server.
 - SSH-Daemon is enabled.
 - https-Server is enabled.
 
-### 8.4) PFC Onboard Serial Interface X3 "/dev/ttyO0"(9p SubD):
+### 8.4) CC100 Onboard Serial Interface X3 "/dev/ttyO0"(9p SubD):
 Is no more owned by operating system Linux, so it has to be configured to be the console output.\
 This can be easily be done via the web-confuguration.
 
-### 8.5) Get in touch with your cc100 the first time
+### 8.5) Get in touch with your CC100 the first time
 
 - Variant A: Web-Based-Management(WBM) via https\
 B.0) Obtain actual IP address\
@@ -405,18 +243,16 @@ C.5) Start WAGO config tool "/usr/sbin/cbm"\
 ## 9.) Learn more about "ptxdist"
 Read "How to become a PTXdist Guru" and other ressources at http://public.pengutronix.de/software/ptxdist/appnotes/
 
-
 ## 10.) Aspects of the daily work
 Building a complete firmware image is necessary exactly one time, to extract
 and build the whole system. For your daily work, you usually will work on package level.
-As usual, you can:
+After entering the cc100-builder (```make bash```), you can:
 - Rebuild a package
 ```
-    >cd <workspace>/ptxproj/
     >ptxdist clean <pkg-name> && ptxdist targetinstall <pkg-name>
 ```
-- Copy "binaries" somehow by hand into cc100's file system, and make them executable.
-- Transfer install-package "<pkg-name>.ipk" somehow into cc100 file system and call
+- Copy "binaries" somehow by hand into CC100's file system, and make them executable.
+- Transfer install-package "<pkg-name>.ipk" somehow into CC100 file system and call
 ```
     >opkg install <pkg-name>.ipk
 ```
@@ -426,21 +262,22 @@ As usual, you can:
 Every binary or installation package(.ipk) is generated for a specific firmware version,
 do not mix up different versions.**
 
-### 10.1) Small projects/packages can be managed from command line interface as follows:
-Open 4 shell sessions on your development host(Ubuntu16.04).
+### 10.1) Projects/packages can be managed from command line interface as follows:
+Open 4 shell sessions on your development host.
 - First shell used to open source code files within an editor like vim or gedit
 ```
-    >cd /wago/ptxproj/src/kbusdemo
-    >gedit kbusdemo1.c
+    cd /wago/ptxproj/src/kbusdemo && gedit kbusdemo1.c
 ```
-- Second shell used for “clean” and “build” the ptxdist package
+- Second shell inside cc100-builder (```make bash```) used to “clean” and “build” the ptxdist package
 ```
-    >cd /wago/ptxproj/
-    >ptxdist clean kbusdemo
-
-    >ptxdist targetinstall kbusdemo
+    ptxdist clean kbusdemo && ptxdist targetinstall kbusdemo
+    
 ```
-- Thirdf shell used to manage and control the cc100 via ssh
+- Third shell used to transfer executable to CC100.
+```
+    scp kbusdemo1 root@<ip or hostname>:/usr/bin/kbusdemo1
+```
+- Fourth shell used to manage and control the CC100 via ssh
 ```
     >ssh root@<ip or hostname>
 
@@ -454,13 +291,13 @@ For the next round trip:
         3. Switch to the second shell and use the cursor-up-key to call the last command…
         4. Rebuild executables
         5. Switch to the third shell and use the cursor-up-key to call the last command…
-        6. Transfer executables to cc100 
+        6. Transfer executables to CC100 
         7. Switch to the fourth shell and use the cursor-up-key to call the last command…
-        8. Start executable on c100
+        8. Start executable on CC100
 
 ### 10.2) Using Web-Based-Management(WBM) feature "Software-Upload" for upload and applying IPK packages
 Tool "ptxdist" automatically generates an ".ipk" file for each package during build process.
-#### 10.2.1) Start your local browser, and navigate to cc100's default homepage(WBM)
+#### 10.2.1) Start your local browser, and navigate to CC100's default homepage(WBM)
 ```
 https://ip.address.assigned.by.dhcp
 ```
@@ -474,17 +311,27 @@ Browse to folder "~/wago/ptxproj/platform-cc100/packages/"\
 Select package to install or update, here "kbusdemo_0.3_arm.ipk".
 
 #### 10.2.4) Click on button [Start Upload].
-Transfers selected file into cc100 file system and show button [Activate].
+Transfers selected file into CC100 file system and show button [Activate].
 
 #### 10.2.5) In newly shown section "Activate new software", click on button [Activate] install package.
 Internally WBM just calls:
 ```
-    >cd /home/
-    >opkg install kbusdemo_0.3_arm.ipk
+    cd /home/ && opkg install kbusdemo_0.3_arm.ipk
 ```
-Depending on type of package a restart of PFC may required.
+Depending on type of package a restart of CC100 may be required.
 
 
-**It may a good idea to setup a build server for a nightly build to check dependencies 
-and consistency and do some unit testing in an automated way.**
+**It may be a good idea to setup a build server for a nightly build to check dependencies and consistency and do some unit testing in an automated way.**
 
+## Make wrapper
+| Command       | Description |
+| ------------- | ----------- |
+| builder       | create docker image *cc100-builder* |
+| init          | initialize PTXdist project in *ptxproj* directory |
+| get           | download all OSS packages |
+| offline-get   | verify that all OSS packages are downloaded |
+| build         | build all packages |
+| offline-build | build all packages without network access |
+| images        | create SD card image |
+| wup           | create WUP file |
+| bash          | runs *cc100-builder* in bash mode |
