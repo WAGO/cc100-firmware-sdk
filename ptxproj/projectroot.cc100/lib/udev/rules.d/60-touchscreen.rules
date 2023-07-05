@@ -1,0 +1,8 @@
+# Evtouch udev.rules
+#
+#KERNEL=="event*", SUBSYSTEM=="input", SYSFS{idVendor}=="0000", SYSFS{idProduct}=="0000", SYMLINK+="input/touch_screen"
+#KERNEL=="mouse*", SUBSYSTEM=="input", SYSFS{idBus}=="0003", SYMLINK+="input/mouse"
+KERNEL=="event[0-9]*", SUBSYSTEM=="input", \
+  ATTRS{name}=="ADS7846 Touchscreen", \
+  SYMLINK+="input/touchscreen"
+

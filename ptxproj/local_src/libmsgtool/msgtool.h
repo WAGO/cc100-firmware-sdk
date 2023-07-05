@@ -8,7 +8,7 @@
 ///------------------------------------------------------------------------------
 /// \file    msgtool.h
 ///
-/// \version $Id: msgtool.h 65689 2022-03-11 14:37:43Z falk.werner@wago.com $
+/// \version $Id$
 ///
 /// \brief   interprocess communication using messages
 ///

@@ -1,0 +1,31 @@
+# captouch udev.rules
+
+#  PIXCIR HID Touch Panel
+KERNEL=="event[0-9]*", SUBSYSTEM=="input", \
+  ATTRS{name}=="PIXCIR HID Touch Panel", \
+  SYMLINK+="input/captouch"
+
+# ILITEK
+KERNEL=="event[0-9]*", SUBSYSTEM=="input", \
+  ATTRS{name}=="ILITEK ILITEK*", \
+  ATTRS{properties}=="2", \
+  SYMLINK+="input/captouch"
+
+# WAVESHARE
+KERNEL=="event[0-9]*", SUBSYSTEM=="input", \
+  ATTRS{name}=="BYZHYYZHY*", \
+  ATTRS{properties}=="2", \
+  SYMLINK+="input/captouch"
+
+#  elo touch
+KERNEL=="event[0-9]*", SUBSYSTEM=="input", \
+  ATTRS{name}=="Elo TouchSystems*", \
+  ATTRS{properties}=="2", \
+  SYMLINK+="input/captouch"
+
+#  QDtech
+KERNEL=="event[0-9]*", SUBSYSTEM=="input", \
+  ATTRS{name}=="QDtech*", \
+  ATTRS{properties}=="2", \
+  SYMLINK+="input/captouch"
+

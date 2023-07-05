@@ -73,6 +73,10 @@ ifdef PTXCONF_ELREST_CUSTOM_UDEV_RULES_INSTALL
 	@$(call install_alternative, elrest-custom-install, 0, 0, 0644, /lib/udev/rules.d/97-change-hdmi-settings.rules)
 endif
 
+ifdef PTXCONF_ELREST_CUSTOM_CC100_UDEV_RULES_INSTALL
+	@$(call install_alternative, elrest-custom-install, 0, 0, 0644, /lib/udev/rules.d/63-gpio-keys.rules)
+endif
+
 ifdef PTXCONF_ELREST_CUSTOM_XORG_CONFIG_INSTALL
 	@$(call install_alternative, elrest-custom-install, 0, 0, 0644, /etc/X11/emptyCursor.xbm)
 	@$(call install_alternative, elrest-custom-install, 0, 0, 0755, /etc/X11/xorg_480_272.conf)
@@ -195,6 +199,7 @@ endif
 
 ifdef PTXCONF_CDS3_RTS_FEATURE_TARGETVISU
 	@$(call install_alternative, elrest-custom-install, 0, 0, 0644, /etc/codesys3.d/CmpTargetvisu.cfg)
+	@$(call install_alternative, elrest-custom-install, 0, 0, 0644, /etc/codesys3.d/SysGraphicWindowQt.cfg)
 endif
 
 ifdef PTXCONF_ELREST_CUSTOM_CDS3_LIBS_INSTALL

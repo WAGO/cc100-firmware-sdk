@@ -22,7 +22,7 @@ HOST_GPTFDISK_DIR	= $(HOST_BUILDDIR)/$(GPTFDISK)
 
 $(STATEDIR)/host-gptfdisk.prepare:
 	@$(call targetinfo)
-	cd $(HOST_GPTFDISK_DIR) && make clean
+	cd $(HOST_GPTFDISK_DIR) && $(MAKE) clean
 	@$(call touch)
 
 # ----------------------------------------------------------------------------

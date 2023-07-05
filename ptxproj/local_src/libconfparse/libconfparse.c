@@ -8,7 +8,7 @@
 ///------------------------------------------------------------------------------
 /// \file libconfparse.c
 ///
-/// \version $Id: libconfparse.c 65689 2022-03-11 14:37:43Z falk.werner@wago.com $
+/// \version $Id$
 ///
 /// \brief library for parsing config files and comandline 
 ///

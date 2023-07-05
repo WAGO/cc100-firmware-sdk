@@ -2325,6 +2325,165 @@
     
   </event>
 </eventclass>
+<eventclass class_range="x000C" name="CANOPEN">
+  <event id="x0000" name="LED_OFF">
+    <led name="CAN" state="STATIC_OFF">
+    </led>
+    <string>
+        	<en>CAN device has not been opened</en>
+        	<de>CAN Treiber nicht geladen</de>
+      	</string>
+    
+  </event>
+  <event id="x0001" name="CAN_OPENED">
+    <led name="CAN" state="STATIC_OFF">
+    </led>
+    <string>
+        <en>The CAN device has been opened</en>
+      </string>
+    
+  </event>
+  <event id="x0002" name="LED_CONFIG">
+    <led name="CAN" state="BLINK_GRN_RED">
+      <on>50</on>
+      <off>50</off>
+    </led>
+    <string>
+        	<en>CAN processes configuration data received from the PLC</en>
+      	</string>
+    
+  </event>
+  <event id="x0003" name="LED_CONFIG_ERROR">
+    <led name="CAN" state="BLINK_GRN_RED">
+      <on>200</on>
+      <off>200</off>
+    </led>
+    <string>
+        	<en>CAN configuration failed</en>
+      	</string>
+    
+  </event>
+  <event id="x0004" name="LED_STOPPED">
+    <led name="CAN" state="BLINK_GRN">
+      <on>200</on>
+      <off>800</off>
+    </led>
+    <string>
+        	<en>CAN State Stop</en>
+      	</string>
+    
+  </event>
+  <event id="x0005" name="LED_PREOP_NOERR">
+    <led name="CAN" state="BLINK_GRN">
+      <on>200</on>
+      <off>200</off>
+    </led>
+    <string>
+        	<en>CAN Preoperational</en>
+      	</string>
+    
+  </event>
+  <event id="x0006" name="LED_PREOP_ERR_1">
+    <led name="CAN" state="SPECIAL_BLINK">
+      <blinkcode>1</blinkcode>
+      <blinkarg>0</blinkarg>
+    </led>
+    <string>
+        	<en>CAN Preoperational - Warning Level</en>
+      	</string>
+    
+  </event>
+  <event id="x0007" name="LED_PREOP_ERR_2">
+    <led name="CAN" state="SPECIAL_BLINK">
+      <blinkcode>1</blinkcode>
+      <blinkarg>1</blinkarg>
+    </led>
+    <string>
+        	<en>CAN Preoperational - Guard Error</en>
+      	</string>
+    
+  </event>
+  <event id="x0008" name="LED_PREOP_ERR_3">
+    <led name="CAN" state="SPECIAL_BLINK">
+      <blinkcode>1</blinkcode>
+      <blinkarg>2</blinkarg>
+    </led>
+    <string>
+        	<en>CAN Preoperational - Sync Error</en>
+      	</string>
+    
+  </event>
+  <event id="x0009" name="LED_OP_NOERR">
+    <led name="CAN" state="STATIC_GRN">
+    </led>
+    <string>
+        	<en>CAN Operational</en>
+      	</string>
+    
+  </event>
+  <event id="x000A" name="LED_OP_ERR_1">
+    <led name="CAN" state="SPECIAL_BLINK">
+      <blinkcode>1</blinkcode>
+      <blinkarg>3</blinkarg>
+    </led>
+    <string>
+        	<en>CAN Operational - Warning Level</en>
+      	</string>
+    
+  </event>
+  <event id="x000B" name="LED_OP_ERR_2">
+    <led name="CAN" state="SPECIAL_BLINK">
+      <blinkcode>1</blinkcode>
+      <blinkarg>4</blinkarg>
+    </led>
+    <string>
+        	<en>CAN Operational - Guard Error</en>
+      	</string>
+    
+  </event>
+  <event id="x000C" name="LED_OP_ERR_3">
+    <led name="CAN" state="SPECIAL_BLINK">
+      <blinkcode>1</blinkcode>
+      <blinkarg>5</blinkarg>
+    </led>
+    <string>
+        	<en>CAN Operational - Sync Error</en>
+      	</string>
+    
+  </event>
+  <event id="x000D" name="LED_ERROR">
+    <led name="CAN" state="STATIC_RED">
+    </led>
+    <string>
+        <en>CAN Busoff</en>
+      </string>
+    
+  </event>
+  <event id="x000E" name="LED_FATAL_ERROR">
+    <led name="CAN" state="BLINK_RED">
+      <on>200</on>
+      <off>200</off>
+    </led>
+    <string>
+            <en>CAN internal or config error</en>
+        </string>
+    
+  </event>
+  <event id="x000F" name="WATCHDOG" persistent="yes">
+    <string>
+        <en>PLC watchdog expired</en>
+      </string>
+    
+  </event>
+  <event id="x0010" name="CAN_CLOSED">
+    <led name="CAN" state="STATIC_OFF">
+    </led>
+    <string>
+        <en>The CAN device has been closed</en>
+      </string>
+    
+  </event>
+</eventclass>
 <eventclass class_range="x0011" name="codesys3">
   <event id="x0000" name="PLC-Online">
     <led name="RUN" state="BLINK_GRN">

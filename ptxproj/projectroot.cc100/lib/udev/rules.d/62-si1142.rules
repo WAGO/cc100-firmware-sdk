@@ -1,0 +1,5 @@
+# Evtouch si1142.rules
+#
+KERNEL=="event[0-9]*", SUBSYSTEM=="input", \
+  ATTRS{name}=="SI114X_Sensor", \
+  SYMLINK+="input/si1142"

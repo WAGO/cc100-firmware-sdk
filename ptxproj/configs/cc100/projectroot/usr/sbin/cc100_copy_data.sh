@@ -6,7 +6,7 @@
 #
 # This file is part of PTXdist package wago-custom-install.
 #
-# Copyright (c) 2014-2022 WAGO GmbH & Co. KG
+# Copyright (c) 2014-2023 WAGO GmbH & Co. KG
 #-----------------------------------------------------------------------------#
 #-----------------------------------------------------------------------------#
 # Script:   pfcXXX_copy_data.sh
@@ -170,10 +170,10 @@ function update_partition_info
     local part_update=0
     local attempts=10
     while [ "$attempts" -gt "0" ]; do
-        echo "Ask kernel to re-read partition table..."
+        print_dbg "Ask kernel to re-read partition table..."
         /sbin/partprobe "${device}"
         if [ "$?" -eq "0" ]; then
-            echo "done"
+            print_dbg "done"
             part_update=1
             break
         fi
@@ -238,6 +238,11 @@ function copy_source_to_sd
     esac
 }
 
+function copy_with_excluded_path
+{
+  /usr/bin/tar -cf - --exclude=$1 /home | /usr/bin/tar -xf - -C /tmp/sd/root
+}
+
 function copy_nand_to_sd
 {
     local DEST_ROOT="/tmp/sd/root"
@@ -250,12 +255,22 @@ function copy_nand_to_sd
     if ls "/boot/loader/"* &>/dev/null; then
         ${BACKUP_CMD} "/boot/loader/"* "${DEST_BOOT}"
     fi
-    ${BACKUP_CMD} "/boot/"* "${DEST_ROOT}/boot"
-    rm -rf "${DEST_ROOT}/boot/loader"
-    rm -rf "${DEST_ROOT}/boot/loader-backup"
 
+    # copy all from /boot, exclude /boot/loader and /boot/loader-backup
+    /usr/bin/tar -cf - --exclude="/boot/loader*" /boot | /usr/bin/tar -xf - -C "${DEST_ROOT}"
+    
     print_dbg "    processing /home..."
+
+    local EXCLUDED_PATHS="$(df | grep overlay | awk '{print $6}')"
+ 
+    if [[ "$EXCLUDED_PATHS" == "" ]]; then
+       	print_dbg "       no overlays detected.." 
     ${BACKUP_CMD} "/home/"* "${DEST_HOME}/"
+    else    
+    	print_dbg "     excluded path(s): $EXCLUDED_PATHS"
+    	EXCLUDED_PATHS="/home/docker/overlay2/*/merged"
+    	copy_with_excluded_path "${EXCLUDED_PATHS}"
+    fi
 
     create_static_nodes "/tmp/sd/root"
 }
@@ -432,7 +447,7 @@ function reformat_sd_gpt
 
         if [[ "${sd_card_size}" != "" ]]; then
 
-            echo "create partitions"
+            print_dbg "create partitions"
             max_image_size=$[$(/etc/config-tools/get_device_data size $(/etc/config-tools/get_device_data name sd-card)) / 1024]
             #clean / renew GPT headers
             erase_sd_gpt ${sd_card_device}
@@ -449,6 +464,12 @@ function reformat_sd_gpt
                 -p ${sd_card_device}
             else
                 # REDUCE TO CONTENT
+                local logical_block_size=$(cat "/sys/block/mmcblk0/queue/logical_block_size")
+                local block_factor=$((1024 * 1024 / logical_block_size))
+                local root_part_offset=$(/etc/config-tools/get_min_sd_card_size rootfs-offset)                
+                local root_part_sector_number=$((${image_size} * ${block_factor} ))
+                ROOTFS_LAST_SECTOR=$((${ROOTFS_FIRST_SECTOR} + ${root_part_sector_number}))
+                                
                 sgdisk --resize-table=128 -a 1 \
                 -n 1:${FSBL1_FIRST_SECTOR}:${FSBL1_LAST_SECTOR}  -c 1:fsbl1 \
                 -n 2:${FSBL2_FIRST_SECTOR}:${FSBL2_LAST_SECTOR}  -c 2:fsbl2 \
@@ -459,18 +480,18 @@ function reformat_sd_gpt
             fi
             
             if [ $? -eq 0 ]; then
-              echo "create partitions ok"
+              print_dbg "create partitions ok"
             else
-              echo "create partitions failed"
+              print_dbg "create partitions failed"
               return $INTERNAL_ERROR
             fi
 
-            echo "set legacy BIOS partition"
+            print_dbg "set legacy BIOS partition"
             sgdisk -A 5:set:2 ${sd_card_device}
             if [ $? -eq 0 ]; then
-              echo "set legacy BIOS partition ok"
+              print_dbg "set legacy BIOS partition ok"
             else
-              echo "set legacy BIOS partition failed"
+              print_dbg "set legacy BIOS partition failed"
               return $INTERNAL_ERROR
             fi
 

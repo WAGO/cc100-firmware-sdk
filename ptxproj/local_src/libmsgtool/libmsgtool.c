@@ -8,7 +8,7 @@
 ///------------------------------------------------------------------------------
 /// \file    libmsgtool.c
 ///
-/// \version $Id: libmsgtool.c 71389 2022-11-03 07:37:39Z wrueckl_elrest $
+/// \version $Id$
 ///
 /// \brief   lib tools, list management, messages
 ///

@@ -53,7 +53,7 @@ LIBCONFPARSE_MAKE_ENV	:= $(CROSS_ENV)
 #$(STATEDIR)/libconfparse.compile:
 #	@$(call targetinfo)
 #	cd $(LIBCONFPARSE_DIR) && \
-#	LIBS="-L$(PREFIX)/lib -R$(PREFIX)/lib" make CFLAGS=-I/$(BUILDDIR)/../sysroot-target/usr/include
+#	LIBS="-L$(PREFIX)/lib -R$(PREFIX)/lib" $(MAKE) CFLAGS=-I/$(BUILDDIR)/../sysroot-target/usr/include
 #	@$(call world/compile, LIBCONFPARSE)
 #	@$(call touch)
 

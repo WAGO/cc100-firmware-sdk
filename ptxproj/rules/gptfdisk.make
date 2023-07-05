@@ -44,7 +44,7 @@ GPTFDISK_CONF_ENV	:= $(CROSS_ENV)
 
 $(STATEDIR)/gptfdisk.prepare:
 	@$(call targetinfo)
-	cd $(GPTFDISK_DIR) && make clean
+	cd $(GPTFDISK_DIR) && $(MAKE) clean
 	@$(call touch)
 
 # ----------------------------------------------------------------------------

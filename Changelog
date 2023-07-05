@@ -1,3 +1,17 @@
+Firmware Release 04.03.03 (25)
+
+System:
+[NEW]   With FW25, the CC100 with part number 751-9401 is supported.
+        Please note that only baud rates up to 500kBit/s are supported.
+
+Runtime System:
+[-]
+
+Web Based Management:
+[-]
+
+################################################################################
+
 Firmware Release 04.02.13 (24)
 
 System:
@@ -20,7 +34,8 @@ Web Based Management:
 
 ################################################################################
 
-Firmware Release 04.01.10 (99)
+Firmware Release 04.01.10 (23)
+
 System:
 [FIXED] Backup&Restore: Backups created via the WBM can be used for restore.
 [FIXED] Firewall: Added option in WBM/Interface configuration to disable IO Check.
@@ -28,9 +43,9 @@ System:
 [FIXED] Restarts caused by multiple actuation of the operating mode switch fixed.
 
 Runtime System:
-[KNOWN] “PLC load watchdog” might not work as espected: the plc load watchdog will 
+[KNOWN] “PLC load watchdog” might not work as espected: the plc load watchdog will
         detect (e.g. an endless loop) but the IEC task might not be stopped in any
-        case. This might lead to a complete stop of the runtime process. As 
+        case. This might lead to a complete stop of the runtime process. As
         workaround and improve “hardening” of your IEC application we recommend
         to use an IEC Task watchdog on all your relevant IEC tasks in your IEC application.
 
@@ -45,7 +60,8 @@ Beta functionalities:
 [-]
 
 ################################################################################
-Firmware Release 03.09.07 (99)
+
+Firmware Release 03.09.07 (21)
 
 System:
 [NEW] Updated ca-certificates to version NSS_3_78_RTM
@@ -66,7 +82,7 @@ Beta functionalities:
 
 ################################################################################
 
-Firmware Release 03.09.04 (99)
+Firmware Release 03.09.04 (21)
 
 System:
 [FIXED] CVE-2022-0847 Kernel bug "Dirty Pipe" enables root rights has been fixed
@@ -74,16 +90,16 @@ System:
 [FIXED] SD card image size has been reduced by 50%
 [FIXED] Reading/writing to an SD card has been significantly increased.
 [FIXED] After removing a USB connection (physical disconnect), reconnection is
-		possible without reboot.
+        possible without reboot.
 
 Runtime System:
 [FIXED] the Codesys raw values of the RTD inputs now represent the connected
-		resistance value
+        resistance value
 [FIXED] Control of the USR LED via IEC-Lib WagoAppAppLED possible
 [FIXED] Transitions/events of the operating mode switch (between RUN/STOP) are
-		reliably detected.
+        reliably detected.
 [FIXED] Switching the operating mode switch several times does not restart the unit,
-		anymore
+        anymore
 
 Fieldbus Interface & Protocols:
 [-]
@@ -96,17 +112,17 @@ Beta functionalities:
 
 ################################################################################
 
-Firmware Release 03.08.08 (99)
+Firmware Release 03.08.08 (20)
 
 System:
 [-]
 
 Runtime System:
-[FIXED] New CODESYS Packages. Previous CODESYS Packages is marked as debug version and shall 
+[FIXED] New CODESYS Packages. Previous CODESYS Packages is marked as debug version and shall
         therefore be uninstalled.
 [FIXED] Create image using WBM SD card (Ext4) applicable.
 [FIXED] WBM CreateImage -> create bootable SD card image Option "Reduce to content" applicable.
-[FIXED] Evoked warnings in device tree will no longer be present and status mes-sage for 
+[FIXED] Evoked warnings in device tree will no longer be present and status mes-sage for
         Common.PCI is no longer displayed.
 [FIXED] SD card formattable to FAT or Ext4 via the WBM.
 
@@ -117,7 +133,7 @@ Functional change:
 [-]
 
 Beta functionalities:
-[BETA] Integration of Docker Deamon. IPK Software upload via WBM. Remains the same as with 
+[BETA] Integration of Docker Deamon. IPK Software upload via WBM. Remains the same as with
        previous Firmware of CC100. Now, Difference to PFC200
 
 ################################################################################

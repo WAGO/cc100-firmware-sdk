@@ -1,0 +1,2 @@
+KERNEL=="card1", SUBSYSTEM=="drm", ACTION=="change", RUN+="/etc/script/setup_hdmi.sh"
+

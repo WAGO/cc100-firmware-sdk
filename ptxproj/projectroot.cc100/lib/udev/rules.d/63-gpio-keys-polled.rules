@@ -1,0 +1,6 @@
+# gpio-keys rules
+#
+KERNEL=="event[0-9]*", SUBSYSTEM=="input", \
+  ATTRS{name}=="PAC-Operating-Mode-Switch", \
+  ATTRS{phys}=="gpio-keys-polled/input0", \
+  SYMLINK+="input/oms_switch"

@@ -1,0 +1,6 @@
+# Evtouch qt1070.rules
+#
+KERNEL=="event[0-9]*", SUBSYSTEM=="input", \
+  ATTRS{name}=="AT42QT1070 QTouch Sensor", \
+  SYMLINK+="input/qt1070"
+
