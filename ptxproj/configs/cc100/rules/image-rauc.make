@@ -24,12 +24,23 @@ IMAGE_RAUC_FILES	:= $(BUILDDIR)/rauc_bundle_conf/rauc_bundle_conf.tar.gz
 ifdef PTXCONF_IMAGE_BOOT_MLO_SRC
 	IMAGE_RAUC_CONFIG	:= rauc-src.config
 else
-	IMAGE_RAUC_CONFIG	:= rauc.config
+	IMAGE_RAUC_CONFIG	:= $(call remove_quotes, $(PTXCONF_IMAGE_RAUC_CONFIG))
 endif
 
 # ----------------------------------------------------------------------------
 # Image
 # ----------------------------------------------------------------------------
+ifdef PTXCONF_IMAGE_RAUC
+
+ifdef PTXCONF_IMAGE_RAUC_BUNDLE_FORMAT_PLAIN
+IMAGE_RAUC_BUNDLE_FORMAT := "plain"
+endif
+ifdef PTXCONF_IMAGE_RAUC_BUNDLE_FORMAT_VERITY
+IMAGE_RAUC_BUNDLE_FORMAT := "verity"
+endif
+ifdef PTXCONF_IMAGE_RAUC_BUNDLE_FORMAT_CRYPT
+IMAGE_RAUC_BUNDLE_FORMAT := "crypt"
+endif
 
 IMAGE_RAUC_KEY = $(PTXDIST_WORKSPACE)/$(call remove_quotes,$(PTXCONF_RAUC_DEVELOPMENT_KEY))
 IMAGE_RAUC_CERT = $(PTXDIST_WORKSPACE)/$(call remove_quotes,$(PTXCONF_RAUC_DEVELOPMENT_CERT))
@@ -53,6 +64,7 @@ $(BUILDDIR)/rauc_bundle_conf/rauc_bundle_conf.tar.gz:
 
 IMAGE_RAUC_ENV	:= \
 	RAUC_BUNDLE_COMPATIBLE="$(call remove_quotes,$(PTXCONF_RAUC_COMPATIBLE))" \
+	RAUC_BUNDLE_FORMAT=$(IMAGE_RAUC_BUNDLE_FORMAT) \
 	RAUC_BUNDLE_VERSION=$(PTXDIST_BSP_AUTOVERSION) \
 	RAUC_BUNDLE_BUILD=$(shell date +%FT%T%z) \
 	RAUC_BUNDLE_DESCRIPTION=$(PTXCONF_IMAGE_RAUC_DESCRIPTION) \
@@ -89,5 +101,7 @@ $(IMAGE_RAUC_CERT):
 	@echo
 	@echo
 	@exit 1
+
+endif
 
 # vim: syntax=make

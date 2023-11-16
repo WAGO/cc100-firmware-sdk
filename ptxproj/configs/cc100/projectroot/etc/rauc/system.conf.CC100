@@ -4,6 +4,7 @@ bootloader=barebox
 mountprefix=/mnt/rauc
 variant-name=CC100
 barebox-statename=bootstate
+bundle-formats=plain verity
 
 [keyring]
 path=/etc/rauc/ca.cert.pem

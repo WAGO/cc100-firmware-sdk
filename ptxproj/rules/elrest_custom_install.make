@@ -36,8 +36,6 @@ ifdef PTXCONF_ELREST_CUSTOM_INIT_FILES_INSTALL
 	@$(call install_link, elrest-custom-install, ../init.d/start_panel, /etc/rc.d/S91_start_panel)
 	@$(call install_alternative, elrest-custom-install, 0, 0, 0755, /etc/init.d/wait4xorg)
 	@$(call install_link, elrest-custom-install, ../init.d/wait4xorg, /etc/rc.d/S97_wait4xorg)
-	@$(call install_alternative, elrest-custom-install, 0, 0, 0755, /etc/init.d/can-networking)
-	@$(call install_link, elrest-custom-install, ../init.d/can-networking, /etc/rc.d/S60_can-networking)
 	@$(call install_alternative, elrest-custom-install, 0, 0, 0755, /etc/init.d/setup_hw)
 	@$(call install_link, elrest-custom-install, ../init.d/setup_hw, /etc/rc.d/S98_setup_hw)
 endif
