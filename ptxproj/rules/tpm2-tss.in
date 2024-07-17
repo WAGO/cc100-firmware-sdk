@@ -1,0 +1,25 @@
+## SECTION=tpm
+
+config TPM2_TSS
+	tristate
+	select HOST_AUTOTOOLS_AUTOCONF_ARCHIVE
+	select OPENSSL
+	select JSON_C
+	select LIBCURL
+	select LIBUUID
+	prompt "tpm2-tss"
+	help
+	  TPM2 Software stack library - TSS and TCTI libraries
+
+	  TPM2.0 TSS (Software Stack) consists of API layers provided
+	  to support TPM 2.0 chips. It is made out of three layers:
+
+	  * System API (SAPI), which implements the system layer API;
+	  * TPM Command Transmission Interface (TCTI), which is used
+	    by SAPI to allow communication with the TAB/RM layer;
+	  * Trusted Access Broker/Resource Manager (TAB/RM), which
+	    handles TPM resources and process coordination.
+
+	  This package contains the TSS and TCTI libraries that client
+	  applications will link against when they require accessing
+	  the TPM.

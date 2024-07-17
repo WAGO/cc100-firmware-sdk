@@ -3,12 +3,7 @@
 config CDS3_INCLUDES
 	bool
 	default n
-#	select CODESYS3
-
-#config CDS3_RTSCFG
-#	bool
-#	default y
-
+	select CODESYS3
 
 config CDS3_IODRVDAL
 	bool "DAL"
@@ -18,6 +13,8 @@ config CDS3_IODRVDAL
 	select DAL
 	select LIBOSLINUX
 	select LIBCOMMONHEADER
+	select FFF
+	select CDS3_TSCEXTTASK
 	help
 		Builds and installs the DAL device Driver.
 
@@ -85,31 +82,10 @@ config CDS3_IODRVCANL2
 	help
 		Builds and installs the CAN Layer2 Driver.
 
-
-config CDS3_IODRVMODBUSS
-	bool "Io Driver Modbus Slave"
-	default n
-	select LED_SERVER_META
-	select WAGO_PFC_DIAGNOSTIC
-	select TYPELABEL
-	select WAGO_DBUS
-	select LIBCTCALLHELPER
-	select CONFIG_TOOLS
-	select CDS3_INCLUDES
-	select CDS3_TSCEXTTASK
-	help
-		Builds and installs the Modbus Slave Driver.
-
-config CDS3_IODRVMODBUSM
-	bool "Io Driver Modbus Master"
-	default n
-	select CDS3_INCLUDES
-	help
-		Builds and installs the Modbus Master Driver.
-
 config CDS3_IODRVSERIAL
 	bool "Io Driver Serial"
 	default n
+	select CODESYS3
 	select CDS3_INCLUDES
 	help
 		Builds and installs the Serial Driver.
@@ -149,6 +125,7 @@ config CDS3_CMPKBUSASYNCCOM
 	select CDS3_IODRVDAL
 	select CDS3_IODRVKBUS
 	select LIBPACKBUS
+	select CDS3_TSCEXTTASK
 	help
 		Builds and installs the CoDeSys 3 component for KBus asynchronous communication library.
 
@@ -169,6 +146,7 @@ config CDS3_TSCDPSLIB
 	select CODESYS3
 	select CDS3_INCLUDES
 	select CDS3_IODRVDPS
+	select CDS3_IODRVDAL
 	help
 	Builds and installs the  CoDeSys Profibus slave library.
 
@@ -197,20 +175,6 @@ config CDS3_TSCCOMSWITCH
 	select CDS3_INCLUDES
 	help
 		Builds and installs the Serial mode switch Component for PFC-Controller.
-
-config CDS3_TSCMODBUS
-	bool "TscModbus library"
-	default n
-	select CDS3_INCLUDES
-	help
-		Builds and installs the Wago Modbus CODESYS library.
-
-config CDS3_CMPMODBUSDIAG
-	bool "CmpModbusDiag library"
-	default n
-	select CDS3_INCLUDES
-	help
-		Builds and installs the Wago Modbus Diagnostics CODESYS library.
 
 config CDS3_TSCTIME_TARGET_PFCXXX
 	bool
@@ -243,6 +207,8 @@ config CDS3_TSCTIME
 	select CDS3_INCLUDES
 	select CDS3_TSCTIME_TARGET_PFCXXX if (CDS3_RTS_PRODUCT_PFCXXX || CDS3_RTS_PRODUCT_PAC || CDS3_RTS_PRODUCT_CC100)
 	select CDS3_TSCTIME_TARGET_VTPCTP if CDS3_RTS_PRODUCT_VTPCTP
+	select CDS3_TSCSHAREDPOINTER
+	select CDS3_TSCASYNCMGR
 	help
 		Builds and installs WAGO time extentions.
 
@@ -251,6 +217,7 @@ config CDS3_TSCCOMEXTRA
 	default n
 	select CODESYS3
 	select CDS3_INCLUDES
+	select CDS3_TSCCOMSWITCH
 	help
 		Builds and installs WAGO extension functions for serial port manipulation.
 
@@ -267,6 +234,7 @@ config CDS3_TSCASYNCMGR
 	default n
 	select CODESYS3
 	select CDS3_INCLUDES
+	select CDS3_TSCEXTTASK
 	help
 		Builds and installs WAGO Async Manager.
 
@@ -340,6 +308,7 @@ config CDS3_TSCRUNLED
 	select CDS3_TSCLED
 	select CDS3_TSCWAGOSTATUSPROVIDER
 	select CONFIG_TOOLS
+	select CDS3_TSCSYSPROCESSORLOAD
 	help
 		Builds and installs the RUN-LED-Driver
 
@@ -387,6 +356,7 @@ config CDS3_TSCSNMP
 	select CODESYS3
 	select CDS3_TSCSHAREDPOINTER
 	select LIBWAGOSNMP
+	select CDS3_TSCASYNCMGR
 	help
 		SNMP-abstaraction for CODESYS V3
 
@@ -509,6 +479,14 @@ config CDS3_TSCPAMIECINTERFACE
 	select PAM
 	help
 		Builds and installs lib-interface for PAM library
+
+config CDS3_TSCWAGOSYSUSERGROUPIECINTERFACE
+	bool "TscWagoSysUserGroupIecInterface"
+	default n
+	select CODESYS3
+	select CDS3_INCLUDES
+	help
+		Builds and installs lib-interface for checking user group library
 		
 config CDS3_TSCIODRVCC100
     bool "cds3-tsciodrvcc100"
@@ -518,3 +496,21 @@ config CDS3_TSCIODRVCC100
     help
         IoDrv for CC100 (currently elrest)
 
+config CDS3_SYSUTIL
+    bool "cds3-sysutil"
+    default n
+    select CDS3_INCLUDES
+    select CODESYS3
+    help
+        SysUtil for websockets (currently elrest)
+
+config CDS3_CMPWSSERVER
+    bool "cds3-cmpwsserver"
+    default n
+    select CDS3_INCLUDES
+    select CODESYS3
+    select CDS3_TSCDRMIECINTERFACE
+    select CDS3_SYSUTIL
+    select HOST_PYTHON3_JSMIN
+    help
+        CmpWSServer for websockets (currently elrest)

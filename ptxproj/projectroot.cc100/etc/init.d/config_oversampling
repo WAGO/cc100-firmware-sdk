@@ -1,0 +1,43 @@
+#!/bin/bash
+#-----------------------------------------------------------------------------#
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+#
+# Copyright (c) 2023 WAGO GmbH & Co. KG
+#-----------------------------------------------------------------------------#
+#-----------------------------------------------------------------------------#
+# Script:   /etc/init.d/config_oversampling
+#
+# Brief:    System init script for CC100 oversampling factor settings.
+#
+# Author:   WRü, elrest Automationssysteme GmbH
+#-----------------------------------------------------------------------------#
+
+RATIO2=/sys/bus/iio/devices/iio\:device2/in_voltage_oversampling_ratio
+RATIO3=/sys/bus/iio/devices/iio\:device3/in_voltage_oversampling_ratio
+FACTOR=32
+
+if [[ ! -e "$RATIO2" ]]; then
+  echo "Error: $RATIO2 not found."
+  exit 1
+fi
+
+if [[ ! -e "$RATIO3" ]]; then
+  echo "Error: $RATIO3 not found."
+  exit 1
+fi
+
+case $1 in
+
+  start)
+    # set oversampling factor
+    echo "$FACTOR" > "$RATIO2"
+    echo "$FACTOR" > "$RATIO3"
+  ;;
+  stop)
+    # reset oversampling factor
+    echo 1 > "$RATIO2"
+    echo 1 > "$RATIO3"
+  ;;
+esac

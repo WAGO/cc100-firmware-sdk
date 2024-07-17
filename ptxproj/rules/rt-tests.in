@@ -17,6 +17,14 @@ menuconfig RT_TESTS
 
 if RT_TESTS
 
+config RT_TESTS_SKIP_TARGETINSTALL
+	bool "skip rt-tests targetinstall stage"
+	default y
+	help
+	  Skip rt-tests targetinstall stage in order to save memory
+	  inside the target device. The install stage will create the package
+	  files into $(PTXDIST_PLATFORMDIR)/packages.
+
 config RT_TESTS_CYCLICTEST
 	bool
 	prompt "cyclictest"

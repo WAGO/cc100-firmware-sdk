@@ -77,7 +77,7 @@ Alternatively you can also run cc100-builder in bash mode (```make bash```) and 
 
     ptxdist select configs/cc100/ptxconfig_generic && \ 
     ptxdist platform configs/cc100/platformconfig && \      
-    ptxdist toolchain /opt/gcc-Toolchain-2022.08/LINARO.Toolchain-2022.08/arm-linux-gnueabihf/bin/ && \
+    ptxdist toolchain /opt/gcc-Toolchain-2022.08-wago.1/LINARO.Toolchain-2022.08-wago.1/arm-linux-gnueabihf/bin/ && \
     ptxdist clean -q
     
 #### 3.1) Get and download all packages

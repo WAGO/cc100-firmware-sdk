@@ -14,7 +14,11 @@
 #
 # We provide this package
 #
+ifndef PTXCONF_RT_TESTS_SKIP_TARGETINSTALL
 PACKAGES-$(PTXCONF_RT_TESTS) += rt-tests
+else
+LAZY_PACKAGES-$(PTXCONF_RT_TESTS) += rt-tests
+endif
 
 #
 # Paths and names

@@ -1,0 +1,25 @@
+## SECTION=tpm
+
+menuconfig TPM2_TOOLS
+	tristate
+	select TPM2_TSS
+	select OPENSSL
+	select LIBCURL
+	select EFIVAR		if TPM2_TOOLS_USE_EFIVAR
+	prompt "tpm2-tools"
+	help
+	  This package contains a set of tools to use with TPM 2.0
+	  chips, for common tasks and features provided by the
+	  hardware; such as for doing basic key management,
+	  attestation, encryption and signing.
+
+if TPM2_TOOLS
+
+config TPM2_TOOLS_USE_EFIVAR
+	bool
+	prompt "Use efivar"
+	help
+	  Building with efivar enables pretty-printing of
+	  the device path.
+
+endif

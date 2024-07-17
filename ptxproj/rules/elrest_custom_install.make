@@ -347,12 +347,9 @@ ifeq ($(PTXCONF_PLATFORM), cc100)
 	@install -D -m644 $(BUILDDIR)/../../projectroot.cc100/usr/include/pfc_boot_table.h $(PTXCONF_SYSROOT_TARGET)/usr/include
 	@$(call install_alternative, elrest-custom-install, 0, 0, 0755, /etc/init.d/calib)
 	@$(call install_link, elrest-custom-install, ../init.d/calib, /etc/rc.d/S99_calib)
+	@$(call install_alternative, elrest-custom-install, 0, 0, 0755, /etc/init.d/config_oversampling)
+	@$(call install_link, elrest-custom-install, ../init.d/config_oversampling, /etc/rc.d/S19_config_oversampling)
 endif
-endif
-
-ifdef PTXCONF_ELREST_CUSTOM_ROOT_DIRECTORIES_INSTALL
-	@$(call install_copy, elrest-custom-install, 0, 0, 0755, /log)
-	@$(call install_copy, elrest-custom-install, 0, 0, 0755, /settings)
 endif
 
 ifdef PTXCONF_ELREST_CUSTOM_U_BOOT_FILES_INSTALL
