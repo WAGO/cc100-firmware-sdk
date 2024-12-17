@@ -49,6 +49,25 @@ EOF
   return $status
 }
 
+function SaveCodesys
+{
+  local dest="${1}"
+
+  local status=$SUCCESS
+  umask 137
+  : > "$dest"
+  chgrp www "$dest" 2>/dev/null || return $?
+  if [ -e /etc/codesys3.d/CODESYSControl_User.cfg ]; then
+    cp /etc/codesys3.d/CODESYSControl_User.cfg "${CDS_HOME_DIR_LINK}/CODESYSControl_User.cfg" 2>/dev/null || return $?
+  fi
+  tar -cpf - -C "${CDS_HOME_DIR_LINK}/" ./ | gzip -1 | $ENCRYPT > "${dest}" 5<< EOF
+${ENCPASSPHRASE}
+EOF
+
+  status=$?
+  return $status
+}
+
 function do_cleanup
 {
   # we have to check the used space error here because
@@ -75,6 +94,7 @@ function do_cleanup
 
   rm -rf "${DEFAULTDESTDIR}"
   rm -f "$statusFile" /tmp/ignored_file_list.txt
+  rm -f "${CDS_HOME_DIR_LINK}/CODESYSControl_User.cfg" 2>/dev/null
 }
 
 function initPartition
@@ -99,6 +119,28 @@ function initPartition
     [ "$packageSystem" = "1" ]   && rm -f "${destinationDir}/$autoAttr${SYSTEM_FILENAME}.tgz"
     [ "$packageSettings" = "1" ] && rm -f "${destinationDir}/$autoAttr${SETTINGS_FILENAME}"
   fi
+}
+
+function BackupCodesys {
+  dest="${destinationDir}/${autoUpdateAppendix}${CODESYS_FILENAME}.tgz$ENC_EXT"
+  SaveCodesys "${dest}" &
+  pid="$!"
+  while [ -d "/proc/$pid" ]; do
+    size="$(du -k "$dest" | cut -f1)"
+    echo "Creating archive: size ${size% *} KBytes." > "${statusFile}.tmp"
+    chgrp www "${statusFile}.tmp" && mv "${statusFile}.tmp" "${statusFile}"
+    sleep 1
+  done
+  wait "$pid"
+  status=$?
+
+  return $status
+}
+
+function BackupHome {
+  SavePartition "codesys" "${autoUpdateAppendix}${CODESYS_FILENAME}" "$destinationDir" "$callMode"
+
+  return $?
 }
 
 #-------------- main-programm ------------------------#
@@ -318,8 +360,16 @@ EOF
   # complete codesys image must be saved -> create image, zip it and copy it to destination
   if [ "$status" = "$SUCCESS" ] && [ "$packageCodesys" = "1" ]; then
     #echo "save codesys"
-    SavePartition "codesys" "${autoUpdateAppendix}${CODESYS_FILENAME}" "$destinationDir" "$callMode"
-    status=$?
+    if [[ "$(/etc/config-tools/get_typelabel_value order)" == 762-34?? ]]; then
+      # These devices have no codesys
+      status=$INVALID_PARAMETER
+    elif [[ "$(/etc/config-tools/get_typelabel_value order)" == 750-83?? ]]; then
+      BackupCodesys
+      status=$?
+    else
+      BackupHome
+      status=$?
+    fi
   fi
 
   # complete system image must be saved -> create image, zip it and copy it to destination

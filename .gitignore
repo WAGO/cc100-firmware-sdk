@@ -56,3 +56,10 @@
 /ptxproj/selected_platformconfig
 /ptxproj/selected_ptxconfig
 /ptxproj/selected_toolchain
+/ptxproj/src/*.gz
+/ptxproj/src/*.tgz
+/ptxproj/src/*.xz
+/ptxproj/src/*.bz2
+/ptxproj/src/*.zip
+/ptxproj/src/*.md5
+/ptxproj/src/*.tar

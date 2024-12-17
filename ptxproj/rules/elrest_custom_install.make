@@ -75,6 +75,12 @@ ifdef PTXCONF_ELREST_CUSTOM_CC100_UDEV_RULES_INSTALL
 	@$(call install_alternative, elrest-custom-install, 0, 0, 0644, /lib/udev/rules.d/63-gpio-keys.rules)
 endif
 
+ifdef PTXCONF_CC100_M4_FIRMWARE_LOAD
+	@$(call install_alternative, elrest-custom-install, 0, 0, 0755, /etc/init.d/load_m4_firmware)
+	@$(call install_link, elrest-custom-install, ../init.d/load_m4_firmware, /etc/rc.d/S10_load_m4_firmware)
+	@$(call install_alternative_tree, elrest-custom-install, 0, 0,  /lib/firmware)
+endif
+
 ifdef PTXCONF_ELREST_CUSTOM_XORG_CONFIG_INSTALL
 	@$(call install_alternative, elrest-custom-install, 0, 0, 0644, /etc/X11/emptyCursor.xbm)
 	@$(call install_alternative, elrest-custom-install, 0, 0, 0755, /etc/X11/xorg_480_272.conf)
@@ -217,6 +223,8 @@ ifdef PTXCONF_START_MICROBROWSER
 	@$(call install_alternative, elrest-custom-install, 0, 0, 0664, /usr/local/bin/microbrowser/large/alphapad.teq)
 	@$(call install_alternative, elrest-custom-install, 0, 0, 0664, /usr/local/bin/microbrowser/large/keypad.teq)
 	@$(call install_alternative_tree, elrest-custom-install, 0, 0,  /usr/local/bin/microbrowser/mb_config)
+	@$(call install_alternative, elrest-custom-install, 0, 0, 0644, /usr/lib/libcrypto.so.1.1)
+	@$(call install_alternative, elrest-custom-install, 0, 0, 0644, /usr/lib/libssl.so.1.1)
 endif
 
 ifdef PTXCONF_ELREST_CUSTOM_USER_FILES_INSTALL
@@ -276,7 +284,10 @@ ifdef PTXCONF_ELREST_CUSTOM_CONFIG_FILES_INSTALL
 	@$(call install_alternative, elrest-custom-install, 0, 0, 0644, /etc/specific/ico-right.png)
 	@$(call install_alternative, elrest-custom-install, 0, 0, 0644, /etc/specific/ico-left.png)
 	@$(call install_alternative, elrest-custom-install, 0, 0, 0644, /etc/specific/dipvalue-on-reset)
-	@$(call install_alternative_tree, elrest-custom-install, 0, 0,  /etc/specific/webengine)
+	@$(call install_alternative, elrest-custom-install, 0, 0, 0644, /etc/specific/webengine/getscrollbarpos_h.js)
+	@$(call install_alternative, elrest-custom-install, 0, 0, 0644, /etc/specific/webengine/getscrollbarpos_v.js)
+	@$(call install_alternative, elrest-custom-install, 0, 0, 0644, /etc/specific/webengine/userstylesheet.conf)
+	@$(call install_alternative, elrest-custom-install, 0, 0, 0644, /etc/specific/webengine/webengine.conf)
 	@$(call install_alternative_tree, elrest-custom-install, 0, 0,  /root/.config)
 	@$(call install_alternative, elrest-custom-install, 0, 0, 0640, /etc/pio2_wretain_direct.conf)
 	@$(call install_alternative, elrest-custom-install, 0, 0, 0644, /etc/specific/hdmi_resolution.conf)
@@ -338,19 +349,14 @@ ifdef PTXCONF_ELREST_CUSTOM_PTE_INSTALL
 endif
 
 ifdef PTXCONF_ELREST_CUSTOM_HEADER_FILES_INSTALL
-ifeq ($(PTXCONF_PLATFORM), vtp-ctp)
-	@install -D -m644 $(BUILDDIR)/../../projectroot.vtp-ctp/usr/include/pfc-startup.h $(PTXCONF_SYSROOT_TARGET)/usr/include
-	@install -D -m644 $(BUILDDIR)/../../projectroot.vtp-ctp/usr/include/pfc_boot_table.h $(PTXCONF_SYSROOT_TARGET)/usr/include
-endif
-ifeq ($(PTXCONF_PLATFORM), cc100)
-	@install -D -m644 $(BUILDDIR)/../../projectroot.cc100/usr/include/pfc-startup.h $(PTXCONF_SYSROOT_TARGET)/usr/include
-	@install -D -m644 $(BUILDDIR)/../../projectroot.cc100/usr/include/pfc_boot_table.h $(PTXCONF_SYSROOT_TARGET)/usr/include
+	@install -D -m644 $(PTXDIST_WORKSPACE)/projectroot.$(PTXCONF_PLATFORM)/usr/include/pfc-startup.h $(PTXCONF_SYSROOT_TARGET)/usr/include
+	@install -D -m644 $(PTXDIST_WORKSPACE)/projectroot.$(PTXCONF_PLATFORM)/usr/include/pfc_boot_table.h $(PTXCONF_SYSROOT_TARGET)/usr/include
+
+ifeq ($(PTXCONF_PLATFORM), $(filter $(PTXCONF_PLATFORM),cc100 cc100-hardened))
 	@$(call install_alternative, elrest-custom-install, 0, 0, 0755, /etc/init.d/calib)
 	@$(call install_link, elrest-custom-install, ../init.d/calib, /etc/rc.d/S99_calib)
-	@$(call install_alternative, elrest-custom-install, 0, 0, 0755, /etc/init.d/config_oversampling)
-	@$(call install_link, elrest-custom-install, ../init.d/config_oversampling, /etc/rc.d/S19_config_oversampling)
-endif
-endif
+endif # ifeq ($(PTXCONF_PLATFORM), $(filter $(PTXCONF_PLATFORM),cc100 cc100-hardened))
+endif # PTXCONF_ELREST_CUSTOM_HEADER_FILES_INSTALL
 
 ifdef PTXCONF_ELREST_CUSTOM_U_BOOT_FILES_INSTALL
 	@$(call install_alternative, elrest-custom-install, 0, 0, 0755, /boot/uEnv.txt)

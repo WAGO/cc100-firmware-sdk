@@ -1,0 +1,21 @@
+## SECTION=elrest_specific_libs
+
+config LIBLIOCLIENT
+	tristate
+	prompt "liblioclient"
+	select LIBIOACCESS
+	select WAGO_PARAMETER_SERVICE_COM
+	select WAGO_PARAMETER_SERVICE_MODEL_FILES
+	select WAGO_PARAMETER_SERVICE_MODEL_FILES_WDX_CPP_HEADERS
+	help
+	  Client library for WDx parameter and local IO access
+
+if LIBLIOCLIENT
+
+config LIBLIOCLIENTTEST
+	tristate
+	prompt "liblioclient Test App"
+	help
+	  Test application for the client library for WDx parameter and local IO access
+
+endif

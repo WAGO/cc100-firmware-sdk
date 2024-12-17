@@ -1,0 +1,9 @@
+## SECTION=elrest_specific_libs
+
+config LIBIOACCESS
+	tristate
+	select GLIB
+	select HOST_GLIB
+	prompt "libioaccess"
+	help
+	  FIXME

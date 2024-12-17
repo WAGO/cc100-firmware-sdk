@@ -107,8 +107,11 @@ $(STATEDIR)/file-transfer.targetinstall:
 	@$(call install_fixup,file-transfer,DESCRIPTION,"This config-tool supports preparation and cleanup of file transfers.")
 
 # Files that should be copied to the target
-
+ifdef PTXCONF_FILE_TRANSFER_STANDALONE
+	@$(call install_copy, file-transfer, 0, 0, 0750, $(PTXDIST_WORKSPACE)/projectroot/etc/config-tools/file_transfer_standalone, /etc/config-tools/file_transfer);
+else
 	@$(call install_alternative, file-transfer, 0, 0, 0750, /etc/config-tools/file_transfer);
+endif
 
 	@$(call install_finish,file-transfer)
 

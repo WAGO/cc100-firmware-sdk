@@ -224,6 +224,58 @@ checkfile()
   return "$CONFIG_FILE_MISSING"
 }
 
+
+# Restore only codesys's home dir
+#
+# Return: 0 on success, unequal to 0 otherwise
+#-----------------------------------------------------------------------------#
+RestoreCodesys() {
+    local backup_codesys_file="$1"
+
+    # don't restore whole home but only Codesys
+    rm -rf "${CDS_HOME_DIR_LINK}/"*
+    rm -rf "${CDS_HOME_DIR_LINK}/".*
+    tar 2>/dev/null -xvf "${backup_codesys_file}" -C "${CDS_HOME_DIR_LINK}/"
+    status=$?
+
+    if [[ $status -ne $SUCCESS ]]; then
+        ReportError $status "tar -xvf "${backup_codesys_file}" -C ${CDS_HOME_DIR_LINK}/"
+        return $status
+    fi
+
+    if [ -e "${CDS_HOME_DIR_LINK}/CODESYSControl_User.cfg" ]; then
+        mv -f ${CDS_HOME_DIR_LINK}/CODESYSControl_User.cfg /etc/codesys3.d/CODESYSControl_User.cfg 2>/dev/null
+        status=$?
+        if [[ $status -ne $SUCCESS ]]; then
+            ReportError $status "mv -f ${CDS_HOME_DIR_LINK}/CODESYSControl_User.cfg /etc/codesys3.d/CODESYSControl_User.cfg"
+        fi
+    fi
+
+    return $status
+}
+
+
+# Restore the whole home partition
+#
+# Return: 0 on success, unequal to 0 otherwise
+#-----------------------------------------------------------------------------#
+RestoreHome () {
+    local backup_codesys_file="$1"
+
+    # first get device and partition of codesys (= home) device
+    destinationPartition="$(/etc/config-tools/get_filesystem_data active-partition)"
+
+    RestorePartition "$destinationPartition" "${backup_codesys_file}"
+
+    status=$?
+    if [[ $status -ne $SUCCESS ]]; then
+        ReportError $status "(RestorePartition $destinationPartition ${backup_codesys_file})"
+    fi
+        
+    return $status
+}
+
+
 # main-programm
 #-----------------------------------------------------------------------------#
 trap OnExit EXIT
@@ -431,15 +483,15 @@ EOF
     #-------------------------------------------------------------
     if [[ $status -eq $SUCCESS ]] && [[ "$packageCodesys" == "1" ]]; then
         print_dbg "restore codesys"
-
-        # first get device and partition of codesys (= home) device
-        destinationPartition="$(/etc/config-tools/get_filesystem_data active-partition)"
-
-        RestorePartition "$destinationPartition" "${backup_codesys_file}"
-
-        status=$?
-        if [[ $status -ne $SUCCESS ]]; then
-            ReportError $status "(RestorePartition $destinationPartition ${backup_codesys_file})"
+        if [[ "$(/etc/config-tools/get_typelabel_value order)" == 762-34?? ]];then
+            # WP400 has no codesys so nothing to do here
+            status=$INVALID_PARAMETER
+        elif [[ "$(/etc/config-tools/get_typelabel_value order)" == 750-83?? ]]; then 
+            RestoreCodesys "${backup_codesys_file}"
+            status=$?
+        else
+            RestoreHome "${backup_codesys_file}"
+            status=$?
         fi
     fi
 
@@ -465,7 +517,7 @@ EOF
         fi
 
         # Synchronize home partition
-        if [[ $status -eq $SUCCESS ]]; then
+        if [[ $status -eq $SUCCESS ]] && [[ -n "$(/usr/bin/readlink "/dev/home_inactive")" ]]; then
             CopyHome
             status=$?
         fi

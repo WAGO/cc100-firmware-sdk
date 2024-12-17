@@ -1,0 +1,7 @@
+## SECTION=initmethod_bbinit
+
+config PP_ONBOARDIO_DAEMON_BBINIT_LINK
+	string
+	depends on PP_ONBOARDIO_DAEMON_STARTSCRIPT
+	prompt "run pp_onboardio at startup"
+	default "S99_pp_onboardio"

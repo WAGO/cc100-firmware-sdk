@@ -15,6 +15,8 @@
 #             - numner, active, configured and state (see info text)
 #
 # Author:   Maxim Laschinsky: WAGO GmbH & Co. KG
+# Author:   KK: WAGO GmbH & Co. KG
+# Auhtor:   SD: WAGO GmbH & Co. KG
 #-----------------------------------------------------------------------------#
 
 # load general definitions and functions
@@ -24,7 +26,9 @@ if [[ ! -f "/etc/config-tools/config_tool_lib" ]]; then
 fi
 source "/etc/config-tools/config_tool_lib"
 
-declare readonly BAREBOX_STATE=/usr/sbin/barebox-state_failsafe.sh
+declare -r UBOOT_GET="/usr/sbin/fw_printenv"
+declare -r BAREBOX_STATE="/usr/sbin/barebox-state_failsafe.sh"
+
 declare -i PARAM_GET_ACTIVE_SYSTEM=0
 declare -i PARAM_GET_INACTIVE_SYSTEM=0
 declare -i PARAM_SHOWHELP=0
@@ -80,23 +84,33 @@ Examples:
 #-----------------------------------------------------------------------------#
 function update_activation_system_numbers
 { 
-    eval $($BAREBOX_STATE -n bootstate --dump-shell)
-    
-    local rootfs1_prio=$bootstate_rootfs_1_priority
-    local rootfs2_prio=$bootstate_rootfs_2_priority
-    local last_chosen=$bootstate_last_chosen
-    
-    if [[ $rootfs1_prio -ge $rootfs2_prio ]]; then
-        CONFIGURED_SYSTEM_NUMBER=1
+    if [[ -x $BAREBOX_STATE ]]; then
+        eval $($BAREBOX_STATE -n bootstate --dump-shell)
+        
+        local rootfs1_prio=$bootstate_rootfs_1_priority
+        local rootfs2_prio=$bootstate_rootfs_2_priority
+        local last_chosen=$bootstate_last_chosen
+        
+        if [[ $rootfs1_prio -ge $rootfs2_prio ]]; then
+            CONFIGURED_SYSTEM_NUMBER=1
+        else
+            CONFIGURED_SYSTEM_NUMBER=2
+        fi
+
+        # Extract active system from barebox (note: "rauc status" command is too slow)
+        ACTIVE_SYSTEM_NUMBER=$last_chosen
+
+    elif [[ -x $UBOOT_GET ]]; then
+        local boot_order=$($UBOOT_GET -n "BOOT_ORDER")
+
+        CONFIGURED_SYSTEM_NUMBER=$(echo -n $boot_order | cut -d' ' -f1) 
+        ACTIVE_SYSTEM_NUMBER=$(GetActiveSystemPartitionNumber)
     else
-        CONFIGURED_SYSTEM_NUMBER=2
+        return $INTERNAL_ERROR
     fi
     
     if [[ "$SD_CARD" == "$(/etc/config-tools/get_filesystem_data active-partition-medium)" ]]; then
         ACTIVE_SYSTEM_NUMBER=$CONFIGURED_SYSTEM_NUMBER
-    else
-        # Extract active system from barebox (note: "rauc status" command is too slow)
-        ACTIVE_SYSTEM_NUMBER=$last_chosen
     fi
     INACTIVE_SYSTEM_NUMBER=$(( (ACTIVE_SYSTEM_NUMBER == 1) ? 2 : 1 ))
 }
@@ -158,7 +172,13 @@ function state
     local system=$1
     local -i state
     local -i result
-    state=$($BAREBOX_STATE --name bootstate --get rootfs.${system}.remaining_attempts)
+    if [[ -x $BAREBOX_STATE ]]; then
+        state=$($BAREBOX_STATE --name bootstate --get rootfs.${system}.remaining_attempts)
+    elif [[ -x $UBOOT_GET ]]; then
+        state=$($UBOOT_GET -n BOOT_${system}_LEFT)
+    else
+        return $INTERNAL_ERROR
+    fi
     result=$?
     if [[ $result -eq 0 ]]; then
         if [[ $state -eq 0 ]]; then

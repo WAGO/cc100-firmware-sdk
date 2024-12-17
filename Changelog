@@ -1,3 +1,18 @@
+Firmware Release 04.06.03 (28)
+
+System:
+[NEW]   With FW28, CC100 with part numbers 751-9402 and 751-9402/000-001 are
+        supported.
+[NEW]   751-9402, 751-9402/000-001: Configuration of the on-board I/Os enabled
+        with engineering tools using the WDx interface
+
+Runtime System:
+[-]
+
+Web Based Management:
+[-]
+
+################################################################################
 Firmware Release 04.05.10 (27)
 
 System:

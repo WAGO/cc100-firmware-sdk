@@ -13,7 +13,7 @@
 #
 PACKAGES-$(PTXCONF_LIBBACNETCONFIG) += libbacnetconfig
 #
-#--- paths and names --------------------------------------------------------- 
+#--- paths and names ---------------------------------------------------------
 #
 LIBBACNETCONFIG                   := libbacnetconfig
 LIBBACNETCONFIG_FOLDER            := libbacnetconfig_git
@@ -22,15 +22,22 @@ LIBBACNETCONFIG_FOLDER            := libbacnetconfig_git
 ifdef PTXCONF_LIBBACNETSTACK_SOURCE_DEV
 BACNETSTACK_REVISION              := 25
 # configure BACnet version (IPK)
-BACNET_VERSION                    := 2.0.2
-LIBBACNETCONFIG_VERSION           := 2.2.0
+BACNET_VERSION                    := 2.1.3
+LIBBACNETCONFIG_VERSION           := 2.4.0
 endif
 
 ifdef PTXCONF_LIBBACNETSTACK_SOURCE_RELEASED
 BACNETSTACK_REVISION              := 25
 # configure BACnet version (IPK)
-BACNET_VERSION                    := 2.0.2
-LIBBACNETCONFIG_VERSION           := 2.2.0
+BACNET_VERSION                    := 2.1.3
+LIBBACNETCONFIG_VERSION           := 2.4.0
+endif
+
+ifdef PTXCONF_LIBBACNETSTACK_ARTIFACTORY_DEV
+BACNETSTACK_REVISION              := 25
+# configure BACnet version (IPK)
+BACNET_VERSION                    := 2.1.3
+LIBBACNETCONFIG_VERSION           := 2.4.0
 endif
 
 ifdef PTXCONF_LIBBACNETCONFIG_SOURCE_DEV
@@ -43,7 +50,11 @@ LIBBACNETCONFIG_SRC_DIR           := $(PTXDIST_WORKSPACE)/$(LIBBACNETCONFIG_REL_
 ifdef PTXCONF_LIBBACNETCONFIG_SOURCE_RELEASED
 LIBBACNETCONFIG_URL               := $(call jfrog_template_to_url, LIBBACNETCONFIG)
 else
+ifdef PTXCONF_LIBBACNETCONFIG_ARTIFACTORY_DEV
+LIBBACNETCONFIG_URL               := $(call jfrog_template_to_url, LIBBACNETCONFIG_ARTIFACTORY_DEV)
+else
 LIBBACNETCONFIG_URL               := file://$(LIBBACNETCONFIG_REL_PATH)
+endif
 endif
 
 LIBBACNETCONFIG_SUFFIX            := $(suffix $(LIBBACNETCONFIG_URL))
@@ -51,6 +62,9 @@ LIBBACNETCONFIG_MD5                = $(shell [ -f $(LIBBACNETCONFIG_MD5_FILE) ] 
 LIBBACNETCONFIG_MD5_FILE          := wago_intern/artifactory_sources/$(LIBBACNETCONFIG)$(LIBBACNETCONFIG_SUFFIX).md5
 LIBBACNETCONFIG_ARTIFACT           = $(call jfrog_get_filename,$(LIBBACNETCONFIG_URL))
 ifdef PTXCONF_LIBBACNETCONFIG_SOURCE_RELEASED
+LIBBACNETCONFIG_ARCHIVE           := $(LIBBACNETCONFIG)-$(LIBBACNETCONFIG_VERSION)$(LIBBACNETCONFIG_SUFFIX)
+endif
+ifdef PTXCONF_LIBBACNETCONFIG_ARTIFACTORY_DEV
 LIBBACNETCONFIG_ARCHIVE           := $(LIBBACNETCONFIG)-$(LIBBACNETCONFIG_VERSION)$(LIBBACNETCONFIG_SUFFIX)
 endif
 
@@ -108,6 +122,18 @@ endif
 	@$(call touch)
 endif
 
+ifdef PTXCONF_LIBBACNETCONFIG_ARTIFACTORY_DEV
+$(STATEDIR)/libbacnetconfig.get:
+	@$(call targetinfo)
+
+ifndef PTXCONF_WAGO_TOOLS_BUILD_VERSION_BINARIES
+	$(call ptx/in-path, PTXDIST_PATH, scripts/wago/artifactory.sh) fetch \
+    '$(LIBBACNETCONFIG_URL)' wago_intern/artifactory_sources/$(LIBBACNETCONFIG_ARCHIVE) '$(LIBBACNETCONFIG_MD5_FILE)'
+endif
+
+	@$(call touch)
+endif
+
 # ----------------------------------------------------------------------------
 # Extract
 # ----------------------------------------------------------------------------
@@ -121,10 +147,16 @@ ifdef PTXCONF_LIBBACNETCONFIG_SOURCE_RELEASED
 	@tar xvf wago_intern/artifactory_sources/$(LIBBACNETCONFIG_ARCHIVE) -C $(LIBBACNETCONFIG_DIR) --strip-components=1
 	@$(call patchin, LIBBACNET)
 endif
+ifdef PTXCONF_LIBBACNETCONFIG_ARTIFACTORY_DEV
+	@mkdir -p $(LIBBACNETCONFIG_DIR)
+	@tar xvf wago_intern/artifactory_sources/$(LIBBACNETCONFIG_ARCHIVE) -C $(LIBBACNETCONFIG_DIR) --strip-components=1
+	@$(call patchin, LIBBACNET)
+else
 ifndef PTXCONF_LIBBACNETCONFIG_SOURCE_RELEASED
 	@if [ ! -L $(LIBBACNETCONFIG_DIR) ]; then \
 	  	ln -s $(LIBBACNETCONFIG_SRC_DIR) $(LIBBACNETCONFIG_DIR); \
 	fi
+endif
 endif
 endif
 	@$(call touch)
@@ -145,7 +177,7 @@ endif
 
 $(STATEDIR)/libbacnetconfig.prepare:
 	@$(call targetinfo)
-ifndef PTXCONF_WAGO_TOOLS_BUILD_VERSION_BINARIES 
+ifndef PTXCONF_WAGO_TOOLS_BUILD_VERSION_BINARIES
 	@$(call world/prepare, LIBBACNETCONFIG)
 endif
 	@$(call touch)
@@ -155,7 +187,7 @@ endif
 # ----------------------------------------------------------------------------
 $(STATEDIR)/libbacnetconfig.compile:
 	@$(call targetinfo)
-	
+
 ifndef PTXCONF_WAGO_TOOLS_BUILD_VERSION_BINARIES
 	@$(call world/compile, LIBBACNETCONFIG)
 endif
@@ -168,12 +200,12 @@ endif
 
 $(STATEDIR)/libbacnetconfig.install:
 	@$(call targetinfo)
-	
+
 ifdef PTXCONF_WAGO_TOOLS_BUILD_VERSION_BINARIES
 #   BSP mode: install by extracting tgz file
 	@mkdir -p $(LIBBACNETCONFIG_PKGDIR) && \
   	tar xvzf $(LIBBACNETCONFIG_PLATFORMCONFIGPACKAGEDIR)/$(LIBBACNETCONFIG_PACKAGE_NAME).tgz -C $(LIBBACNETCONFIG_PKGDIR)
-else	
+else
 # 	normal mode, call "make install"
 
 	@$(call world/install, LIBBACNETCONFIG)
@@ -204,13 +236,13 @@ $(STATEDIR)/libbacnetconfig.targetinstall:
 
 	@$(call install_lib, libbacnetconfig, 0, 0, 0644, libbacnetconfig)
 	@$(call install_link, libbacnetconfig, $(LIBBACNETCONFIG_BIN), /usr/lib/$(LIBBACNETCONFIG_SO_NAME))
-	
+
 	@mkdir -p $(LIBBACNETCONFIG_PKGDIR)/etc/
 	@$(call install_tree, libbacnetconfig, 0, 0, -, /etc/)
 #ifdef PTXCONF_CT_BACNET_CONFIG
 #	@$(call install_copy, libbacnetconfig, 0, 0, 0750, -, /etc/config-tools/bacnet_config)
 #endif
-	
+
 #ifdef PTXCONF_CT_BACNET_BACKUP_RESTORE
 #	@$(call install_copy, libbacnetconfig, 0, 0, 0750, -, /etc/config-tools/bacnet_backup_restore)
 #endif
@@ -225,7 +257,7 @@ $(STATEDIR)/libbacnetconfig.targetinstall:
 
 
 	@$(call install_finish, libbacnetconfig)
-	
+
 	@$(call touch)
 
 # ----------------------------------------------------------------------------
@@ -242,5 +274,5 @@ $(STATEDIR)/libbacnetconfig.clean:
 	fi
 	@$(call clean_pkg, LIBBACNETCONFIG)
 	@rm -rf $(LIBBACNETCONFIG_BUILDROOT_DIR)
-	
+
 # vim: syntax=make

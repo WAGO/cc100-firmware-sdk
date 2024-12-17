@@ -20,7 +20,7 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <string.h>
-#include <typelabel_API.h>
+#include <stdint.h>
 
 #define CUSTOM   0x01
 #define CODESYS2 0x02
@@ -176,22 +176,16 @@ static void printRuntimes(uint32_t runtimeBits,uint8_t json)
   int havePrinted=0;
   if(json)
   {
-
-  }
-  if(json)
-  {
-  /*  jsonTrueFalse("{",custom,(runtimeBits & CUSTOM),",");
-    jsonTrueFalse("",codesys2,(runtimeBits & CODESYS2),",");
-    jsonTrueFalse("",codesys3,(runtimeBits & CODESYS3),"}");*/
     printf("{\"availableVersions\":[");
     pDelimitter=komma;
-
   }
+
     if(runtimeBits & CUSTOM)
     {
       printf("%s",custom);
       havePrinted=1;
     }
+
     if(runtimeBits & CODESYS3)
     {
       if(havePrinted)
@@ -201,6 +195,7 @@ static void printRuntimes(uint32_t runtimeBits,uint8_t json)
       printf("%s",codesys3);
       havePrinted=1;
     }
+
     if(runtimeBits & CODESYS2)
     {
       if(havePrinted)
@@ -210,6 +205,7 @@ static void printRuntimes(uint32_t runtimeBits,uint8_t json)
       printf("%s",codesys2);
       havePrinted=1;
     }
+
     if(runtimeBits & ERUNTIME)
     {
       if(havePrinted)
@@ -218,105 +214,26 @@ static void printRuntimes(uint32_t runtimeBits,uint8_t json)
       }
       printf("%s",eruntime);
       havePrinted=1;
+    }
 
-    }
-    if(!json && havePrinted)
-    {
-      printf("\n");
-    }
     if(json)
     {
       printf("]}");
     }
-}
-
-static uint32_t checkBlacklist(char * value)
-{
-  uint32_t blacklist = 0;
-  //char * lineptr = NULL;
-  static int once = 0;
-  static char ** list = NULL;
-  static int count = 0;
-  int i;
-
-  if(once == 0)
-  {
-    FILE * fp = fopen("/etc/specific/rtsbl","r");
-    if(fp != NULL)
+    else if(havePrinted)
     {
-      long fsize;
-      char *string;
-      char * line;
-      fseek(fp, 0, SEEK_END);
-      fsize = ftell(fp);
-      fseek(fp, 0, SEEK_SET);
-      string = malloc(fsize + 1);
-      fread(string, fsize, 1, fp);
-      fclose(fp);
-      string[fsize] = 0;
-
-
-      line = strtok(string,"\n");
-      while(line != NULL)
-      {
-        for(i=0;line[i]==' ' && line[i]!=0;i++);
-        if(line[i] != '#' && line[i] != 0)
-        {
-          int k = strlen(line)-1;
-          for(;k>i && line[k] == ' ';k--);
-          line[k+1]=0;
-
-          list = realloc(list,sizeof(char*)*(count+1));
-          list[count] = strdup(&line[i]);
-          count++;
-        }
-
-        line = strtok(NULL,"\n");
-      }
-
-      free(string);
-
-      once = 1;
+      printf("\n");
     }
-  }
-
-  for(i=0;i<count;i++)
-  {
-    if(!strcmp(value,list[i]))
-    {
-      blacklist=1;
-      break;
-    }
-  }
-
-  return blacklist;
 }
 
 static uint32_t checkCodesys3(void)
 {
-  uint32_t ret = 0;
-  char revisions[32];
-  FILE * fp = fopen("/etc/REVISIONS","r");
-  if(fp != NULL)
-  {
-    if (fread(revisions, 1, sizeof(revisions), fp) > 14)
-    {
-      if ((strstr(revisions,"FIRMWARE=04.") != NULL))  // FIRMWARE=04.xx.xx(xx)
-      {
-        ret = 1;
-      }
-    }
-    fclose(fp);
-  }
-  return ret;
+  const char * codesys3Path = "/usr/bin/codesys3";
+  return (access(codesys3Path, F_OK|X_OK) == 0);
 }
 
 int main(int argc,char *argv[])
 {
-  tTypeLabel typelabel;
-  char * cds2 = NULL;
-  char * cds3 = NULL;
-  uint32_t runtimeBits=CUSTOM;
   tOptions opt;
   opt = _ParseOptions(argc, argv);
   if(opt.help)
@@ -324,41 +241,11 @@ int main(int argc,char *argv[])
     _Usage();
     exit(EXIT_FAILURE);
   }
-
-  typelabel = typelabel_OBJECT_New();
-  if(TYPELABEL_RETURN_OK != typelabel_OBJECT_Open(typelabel))
-  {
-    puts("Open Typelabel failed!");
-    exit(EXIT_FAILURE);
-  }
-  typelabel_OBJECT_Sync(typelabel);
-  cds2 = typelabel_OBJECT_GetValue(typelabel,"TARGETID");
-  cds3 = typelabel_OBJECT_GetValue(typelabel,"DEVICEID");
-  typelabel_OBJECT_Destroy(typelabel);
-
-  if (cds2 != NULL)
-  {
-	if (  (0 != strtoul(cds2,NULL,0))
-       && (0 == checkBlacklist(cds2)))
-    {
-      runtimeBits|=CODESYS2;
-    }
-    free(cds2);
-  }
-
-  if (cds3 != NULL)
-  {
-    if (  (0 != strtoul(cds3,NULL,0))
-       && (0 == checkBlacklist(cds3)))
-    {
-      runtimeBits|=ERUNTIME;
-    }
-    free(cds3);
-  }
-
+  
+  uint32_t runtimeBits=CUSTOM;
   if (checkCodesys3())
   {
-    runtimeBits = CODESYS3 | CUSTOM;
+    runtimeBits |= CODESYS3;
   }
 
   if(opt.runtime)

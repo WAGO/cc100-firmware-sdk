@@ -91,31 +91,16 @@ function system_backup_is_compatible
     return $result
 }
 
+function prepare_partition {
+  local target="$1" # "system" | "home"
 
-############### main #################
-
-trap cleanup EXIT
-
-pv_label=""
-
-FSTYPE_ARG=''
-
-flash_type=$(/etc/config-tools/get_device_data medium "${destinationPartition}")
-
-case $destinationPartition in
-  *ubi*)
-    FSTYPE_ARG='-t ubifs';; # mount needs an explicit fstype in this case
-esac 
-
-case "$sourceFilename" in
-  *${SYSTEM_FILENAME}*)
+  if [[ $target == "system" ]]; then
     print_dbg mount partitions...
     if ! system_backup_is_compatible ${sourceFilename}; then
         SetLastError "Backup version doesn't match corrent system version."
         exit $LAST_ERROR_SET
     fi
 
-    pv_label="system"
     mkdir -p $destinationDir
     do_mount "$FSTYPE_ARG" "$destinationPartition" "$destinationDir"
 
@@ -138,75 +123,105 @@ case "$sourceFilename" in
             ;;
     esac
 
-    ;;
-  *${CODESYS_FILENAME}*)
-      
-    pv_label="codesys"
+  elif [[ $target == "home" ]]; then
     # Be careful! Wiping /home!
     rm -rf /home/*
-    destinationDir="/home/"
-    ;;
-esac
+  fi
+}
 
-print_dbg extract rootfs to ${destinationDir}...
+function extract {
+  local sourceFilename="$1"
+  local destinationDir="$2"
 
-case "$sourceFilename" in
-  *${SYSTEM_FILENAME}*)
-		if [[ "$(which pv)" != "" ]]; then
-		  # show progress bar
-		  totalSize=$(ls -l ${sourceFilename} | awk '{print $5}') # busybox' stat cannot handle -c
-		  { pv -N $pv_label -tps "$totalSize" -w 70 "${sourceFilename}" | \
-		  tar 2>/dev/null xzp -C ${destinationDir} -f -; } || exit "$SHELL_ERROR"
-		else
-		  tar 2>/dev/null xzpf "${sourceFilename}" -C ${destinationDir} || exit "$SHELL_ERROR"
-		fi
-		;;
-  *${CODESYS_FILENAME}*)
-    if [[ "enabled" == "$(/etc/config-tools/get_runtime_config homedir-on-sdcard)" ]]; then
-      if [[ "$(which pv)" != "" ]]; then
-        # show progress bar
-        totalSize=$(ls -l "${sourceFilename}" | awk '{print $5}') # busybox' stat cannot handle -c
-        { pv -N $pv_label -tps "$totalSize" -w 70 "${sourceFilename}" | \
-        tar 2>/dev/null xzp -C ${destinationDir} -f - --exclude ./codesys_root; } || exit "$SHELL_ERROR"
-      else
-        tar -xf "${sourceFilename}" -C ${destinationDir} --exclude ./codesys_root || exit "$SHELL_ERROR"
-      fi
-      rm -rf /media/sd/*
-      rm -rf /media/sd/.* ||:  # ||: is needed because .* throws error by deleting . and ..
-      tar -xvf "${sourceFilename}" -C /media/sd/ ./codesys_root/ --strip-components=2 || exit "$SHELL_ERROR"
-      mv -f /media/sd/CODESYSControl_User.cfg /etc/codesys3.d/CODESYSControl_User.cfg 2>/dev/null ||:
+  if [[ "$(which pv)" != "" ]]; then
+    # show progress bar
+    totalSize=$(ls -l ${sourceFilename} | awk '{print $5}') # busybox' stat cannot handle -c
+    { pv -N $pv_label -tps "$totalSize" -w 70 "${sourceFilename}" | \
+    tar 2>/dev/null xzp -C ${destinationDir} -f -; } || exit "$SHELL_ERROR"
+  else
+    tar 2>/dev/null xzpf "${sourceFilename}" -C ${destinationDir} || exit "$SHELL_ERROR"
+  fi
+}
+
+function extract_to_home {
+  local sourceFilename="$1"
+  local destinationDir="/home/"
+
+  if [[ "enabled" == "$(/etc/config-tools/get_runtime_config homedir-on-sdcard)" ]]; then
+    # restore home without codesys
+    if [[ "$(which pv)" != "" ]]; then
+      # show progress bar
+      totalSize=$(ls -l "${sourceFilename}" | awk '{print $5}') # busybox' stat cannot handle -c
+      { pv -N $pv_label -tps "$totalSize" -w 70 "${sourceFilename}" | \
+      tar 2>/dev/null xzp -C ${destinationDir} -f - --exclude ./codesys_root; } || exit "$SHELL_ERROR"
     else
-      if [[ "$(which pv)" != "" ]]; then
-        # show progress bar
-        totalSize=$(ls -l ${sourceFilename} | awk '{print $5}') # busybox' stat cannot handle -c
-        { pv -N $pv_label -tps "$totalSize" -w 70 "${sourceFilename}" | \
-        tar 2>/dev/null xzp -C ${destinationDir} -f -; } || exit "$SHELL_ERROR"
-      else
-        tar 2>/dev/null xzpf "${sourceFilename}" -C ${destinationDir} || exit "$SHELL_ERROR"
-      fi
-      mv -f /home/codesys_root/CODESYSControl_User.cfg /etc/codesys3.d/CODESYSControl_User.cfg 2>/dev/null ||:
+      tar -xf "${sourceFilename}" -C ${destinationDir} --exclude ./codesys_root || exit "$SHELL_ERROR"
     fi
-esac
-	
+
+    # restore codesys to /media/sd/
+    rm -rf /media/sd/*
+    rm -rf /media/sd/.* ||:  # ||: is needed because .* throws error by deleting . and ..
+    tar -xvf "${sourceFilename}" -C /media/sd/ ./codesys_root/ --strip-components=2 || exit "$SHELL_ERROR"
+    mv -f /media/sd/CODESYSControl_User.cfg /etc/codesys3.d/CODESYSControl_User.cfg 2>/dev/null ||:
+  else
+    extract "${sourceFilename}" "${destinationDir}"
+    mv -f "${destinationDir}/codesys_root/CODESYSControl_User.cfg" /etc/codesys3.d/CODESYSControl_User.cfg 2>/dev/null ||:
+  fi
+}
+
+function copy_settings {
+  local settingsFilename="$1"
+  local destinationDir="$2"
+
+  print_dbg copy settings...     
+  # The system partition we created  will restore its settings when it boots
+  # for the first time. It will look for the settings file in its
+  # $DEFAULT_SETTINGS_DIR, so it is copied there. If no settings file is
+  # provided by the caller, the current settings have to be backed up and
+  # copied over to the new partition.
+
+  mkdir -p ${destinationDir}/${DEFAULT_SETTINGS_DIR}
+  if [[ -f "${settingsFilename}" ]]; then
+    print_dbg "cp ${settingsFilename} ${destinationDir}/${DEFAULT_SETTINGS_DIR}/${completeSettingsFileName}"
+    cp ${settingsFilename} ${destinationDir}/${DEFAULT_SETTINGS_DIR}/${completeSettingsFileName}
+  fi
+
+  # Trigger settings restore in auto_firmware_restore script on next bootup
+  printf $UPDATE_STATE_COMPLETE > ${destinationDir}/${DEFAULT_SETTINGS_DIR}/${autoRestoreStatusFile}
+}
+
+############### main #################
+
+trap cleanup EXIT
+
+pv_label=""
+
+FSTYPE_ARG=''
+
+flash_type=$(/etc/config-tools/get_device_data medium "${destinationPartition}")
+
+case $destinationPartition in
+  *ubi*)
+    FSTYPE_ARG='-t ubifs';; # mount needs an explicit fstype in this case
+esac 
+
 
 case "$sourceFilename" in
   *${SYSTEM_FILENAME}*)
-     print_dbg copy settings...     
-     # The system partition we created  will restore its settings when it boots
-     # for the first time. It will look for the settings file in its
-     # $DEFAULT_SETTINGS_DIR, so it is copied there. If no settings file is
-     # provided by the caller, the current settings have to be backed up and
-     # copied over to the new partition.
-
-     mkdir -p ${destinationDir}/${DEFAULT_SETTINGS_DIR}
-     if [[ -f "${settingsFilename}" ]]; then
-       print_dbg "cp ${settingsFilename} ${destinationDir}/${DEFAULT_SETTINGS_DIR}/${completeSettingsFileName}"
-       cp ${settingsFilename} ${destinationDir}/${DEFAULT_SETTINGS_DIR}/${completeSettingsFileName}
-     fi
-
-     # Trigger settings restore in auto_firmware_restore script on next bootup
-     printf $UPDATE_STATE_COMPLETE > ${destinationDir}/${DEFAULT_SETTINGS_DIR}/${autoRestoreStatusFile}
-
+    pv_label="system"
+    prepare_partition "system"
+    print_dbg extract rootfs to ${destinationDir}...
+    extract "${sourceFilename}" "${destinationDir}"
+    copy_settings "${settingsFilename}" "${destinationDir}"
+    ;;
+  *${CODESYS_FILENAME}*)
+    pv_label="codesys"
+    if [[ ! "$(/etc/config-tools/get_typelabel_value order)" == 750-83?? ]] \
+       && [[ ! "$(/etc/config-tools/get_typelabel_value order)" == 762-34?? ]]; then
+      # PFC300 and WP400's codesys restore is handled differently
+      prepare_partition "home"
+      extract_to_home "${sourceFilename}"
+    fi
     ;;
 esac
 

@@ -1,0 +1,37 @@
+#!/bin/sh
+#
+# load_m4_firmware 
+#
+
+# load firmware elf-file for cortex M4
+
+rproc_class_dir="/sys/class/remoteproc/remoteproc0"
+fmw_dir="/lib/firmware"
+fmw_name="_CM4.elf"
+
+
+case "$1" in
+	start)
+		devconf=$(/etc/config-tools/get_typelabel_value -a | grep DEVCONF)
+		devconf="${devconf##*=}"
+
+		fmw_name=$devconf$fmw_name
+		if [ -f /lib/firmware/$fmw_name ]; then
+			echo "M4 firmware file found"
+			/bin/echo -n "$fmw_name" > $rproc_class_dir/firmware
+			/bin/echo -n start > $rproc_class_dir/state
+		else
+			echo "M4 firmware not found"
+			exit 1
+		fi
+		;;
+	stop)
+		 /bin/echo -n stop > $rproc_class_dir/state
+		;;
+	*)
+
+	echo "usage: $N {start|stop}" >&2
+	exit 1
+	;;
+esac
+

@@ -236,7 +236,7 @@ function RS232SetMode
     else
       if [ "$actualOwner" == "Linux" ] || [ "$newOwner" == "Linux" ] ; then
         # set RS232 mode in case of Linux-Console
-        /etc/config-tools/set_serial_mode rs232
+        /etc/config-tools/config_serial_interface -s mode=rs232
       fi
       if [ "$newOwner" != "$actualOwner" ]; then
         # disconnect actual user ...

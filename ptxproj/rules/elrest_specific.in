@@ -1,16 +1,20 @@
 ## SECTION=elrest_specific
 
-menu "Tools                         "
+menu "Tools                            "
 source "generated/elrest_specific_tools.in"
 endmenu
 
 
-menu "Applications                  "
+menu "Applications                     "
 source "generated/elrest_specific_applications.in"
 endmenu
 
 
+menu "Libraries                        "
+source "generated/elrest_specific_libs.in"
+endmenu
 
-menu "Install Elrest custom files   "
+menu "Install Elrest custom files      "
 source "generated/elrest_custom_install.in"
 endmenu
+

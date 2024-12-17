@@ -1,8 +1,17 @@
 ## SECTION=separated_config_tools
 
-config FILE_TRANSFER
+menuconfig FILE_TRANSFER
 	bool
-	select CT_RESERVED_AREA
+	select FILE_TRANSFER_STANDALONE if !CT_RESERVED_AREA
 	prompt "File Transfer Tool"
 	help
 	  This config-tool supports file transfer preparation. It mounts/unmounts the reserved area partition if available.
+
+if FILE_TRANSFER
+config FILE_TRANSFER_STANDALONE
+	bool
+	default n
+	prompt "work on single home partition"
+	help
+	  Instead of working with two home partitions, configure this config-tool to work on a single home partition.
+endif

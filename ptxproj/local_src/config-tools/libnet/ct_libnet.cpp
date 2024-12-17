@@ -1599,11 +1599,17 @@ bool ct_libnet_swconfig_default_for_unsupported_switch(const char* default_value
 }
 #endif
 
-static int get_dsa_state__(char * const value, size_t const valueLen, const napi::BridgeConfig& bridge_config)
+static int get_dsa_state__(char * const value, size_t const valueLen, const napi::InterfaceConfigs& interface_configs,
+                           const napi::BridgeConfig& bridge_config)
 {
     if(valueLen < 2)
     {
         return NOT_ENOUGH_SPACE_ERROR;
+    }
+
+    if(interface_configs.GetConfig().size() < 2)
+    {
+        return INVALID_PARAMETER;
     }
 
     auto areinsamebridge = bridge_config.AreInSameBridge({"ethX1", "ethX2"});
@@ -1624,8 +1630,15 @@ int ct_libnet_set_dsa_state(const char *value, libnetSession_t *)
         return INVALID_PARAMETER;
     }
 
+    napi::InterfaceConfigs interface_configs;
+    auto error = napi::GetInterfaceConfigs(interface_configs);
+    if (error.IsNotOk())
+    {
+        return INVALID_PARAMETER;
+    }
+
     napi::BridgeConfig bridge_config;
-    auto error = napi::GetBridgeConfig(bridge_config);
+    error = napi::GetBridgeConfig(bridge_config);
     if (error.IsNotOk())
     {
         return INVALID_PARAMETER;
@@ -1633,28 +1646,35 @@ int ct_libnet_set_dsa_state(const char *value, libnetSession_t *)
 
     // Only change switch hw if old and new dsa state differ.
     char oldValue[2] = {'\0'};
-    get_dsa_state__(oldValue, sizeof(oldValue), bridge_config);
-    if(0 == strcmp(value, oldValue))
+    int ret = get_dsa_state__(oldValue, sizeof(oldValue), interface_configs, bridge_config);
+    if(ret == SUCCESS)
     {
-        return SUCCESS;
-    }
-
-    if (strcmp("0", value) == 0) {
-        bridge_config.AddBridge("br0");
-        bridge_config.AssignInterfaceToBridge("ethX1", "br0");
-        bridge_config.AssignInterfaceToBridge("ethX2", "br0");
-        if (bridge_config.BridgeIsEmpty("br1")) {
-            bridge_config.DeleteBridge("br1");
+        if(0 == strcmp(value, oldValue))
+        {
+            return SUCCESS;
         }
-    } else if (strcmp("1", value) == 0) {
-        bridge_config.AddBridge("br0");
-        bridge_config.AssignInterfaceToBridge("ethX1", "br0");
-        bridge_config.AddBridge("br1");
-        bridge_config.AssignInterfaceToBridge("ethX2", "br1");
-    }
 
-    error = napi::SetBridgeConfig(bridge_config);
-    if (error.IsNotOk())
+        if (strcmp("0", value) == 0) {
+            bridge_config.AddBridge("br0");
+            bridge_config.AssignInterfaceToBridge("ethX1", "br0");
+            bridge_config.AssignInterfaceToBridge("ethX2", "br0");
+            if (bridge_config.BridgeIsEmpty("br1")) {
+                bridge_config.DeleteBridge("br1");
+            }
+        } else if (strcmp("1", value) == 0) {
+            bridge_config.AddBridge("br0");
+            bridge_config.AssignInterfaceToBridge("ethX1", "br0");
+            bridge_config.AddBridge("br1");
+            bridge_config.AssignInterfaceToBridge("ethX2", "br1");
+        }
+
+        error = napi::SetBridgeConfig(bridge_config);
+        if (error.IsNotOk())
+        {
+            return INVALID_PARAMETER;
+        }
+    }
+    else
     {
         return INVALID_PARAMETER;
     }
@@ -1664,18 +1684,28 @@ int ct_libnet_set_dsa_state(const char *value, libnetSession_t *)
 
 int ct_libnet_get_dsa_state(char *value, size_t valueLen, libnetSession_t *)
 {
-    assert(NULL != value);
-    napi::BridgeConfig bridge_config;
-    napi::GetBridgeConfig(bridge_config);
-    return get_dsa_state__(value, valueLen, bridge_config);
+    return ct_libnet_get_actual_dsa_state(value, valueLen);
 }
 
 int ct_libnet_get_actual_dsa_state(char * const value, size_t const valueLen)
 {
     assert(NULL != value);
+
+    napi::InterfaceConfigs interface_configs;
+    auto error = napi::GetInterfaceConfigs(interface_configs);
+    if (error.IsNotOk())
+    {
+        return INVALID_PARAMETER;
+    }
+
     napi::BridgeConfig bridge_config;
-    napi::GetBridgeConfig(bridge_config);
-    return get_dsa_state__(value, valueLen, bridge_config);
+    error = napi::GetBridgeConfig(bridge_config);
+    if (error.IsNotOk())
+    {
+        return INVALID_PARAMETER;
+    }
+
+    return get_dsa_state__(value, valueLen, interface_configs, bridge_config);
 }
 
 #ifdef __ENABLE_SWCONFIG

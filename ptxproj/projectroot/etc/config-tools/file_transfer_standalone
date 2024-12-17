@@ -1,0 +1,335 @@
+#!/bin/bash
+
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+#
+# Copyright (c) 2018-2022 WAGO GmbH & Co. KG
+
+#-----------------------------------------------------------------------------
+# Script-name: file_transfer
+#
+# Prepare and clean file transfers.
+#
+# Author: WAGO GmbH & Co. KG.
+#-----------------------------------------------------------------------------
+
+declare FILE_TRANSER_PATH="/home/wago/file_transfer"
+
+# Set error on use of undefined shell variables
+set -u
+
+function print_usage
+{
+    echo
+    echo "* Command line interface tool supporting file transferes. *"
+    echo
+    echo "Usage:"
+    echo "  file-transfer <options>"
+    echo
+    echo "Options:"
+    echo "  -h, --help                        Show this help text."
+    echo "  -x, --extract-from-uri-encoding   Extracts arguments from an URI encoding"
+    echo "  -q, --quiet                       Don't print information or error texts to stdout/stderr"
+    echo "  -t, --text                        Prints output as name=value pairs, one per line"
+    echo "  -j, --json                        Prints output as JSON format string"
+    echo "  -p, --prepare                     Prepare file transfer."
+    echo "  -c, --cleanup                     Cleanup after file transfer."
+    echo "  -f, --print-free-capacity         Print out free capacity for file transfer in bytes"
+    echo "  -a, --print-available-capacity    Print out (user) available capacity for file transfer in bytes"
+    echo "  -d, --print-file-transfer-path    Print out file transfer directory (\"none\" if not prepared)"
+}
+
+function free_capacity {
+    local status="${SUCCESS}"
+
+    local -i free_capacity_in_1k_block="$(df -k /home | tail -1 | awk '{print $4}')"
+    status=$?
+
+    if [[ ${status} != "${SUCCESS}" ]]; then
+        return "${INTERNAL_ERROR}"
+    fi
+    echo -n $(( free_capacity_in_1k_block * 1024 ))
+    return ${status}
+}
+
+function available_capacity {
+    local status="${SUCCESS}"
+
+    local free_capacity="$(free_capacity)"
+    status=$?
+    
+    if [[ ${status} != "${SUCCESS}" ]]; then
+        return "${INTERNAL_ERROR}"
+    fi
+    echo -n "${free_capacity}"
+    return ${status}
+}
+
+function file_transfer_path {
+    local status="${SUCCESS}"
+    
+    if [[ -d "${FILE_TRANSER_PATH}" ]]; then
+        echo -n "${FILE_TRANSER_PATH}"
+    else
+        echo -n "none"
+    fi    
+
+    return ${status}
+}
+
+function prepare
+{
+    local status=${INTERNAL_ERROR}
+    local output=""
+
+    cleanup
+    status=$?
+
+    if [[ ${status} == "${SUCCESS}" ]]; then
+        mkdir -p "${FILE_TRANSER_PATH}"
+        status=$?
+    fi
+    if [[ ${status} == "${SUCCESS}" ]]; then
+        chmod 777 "${FILE_TRANSER_PATH}"
+        status=$?
+        if [[ ${status} == "${SUCCESS}" ]]; then
+            output=$(get_info)
+            status=$?
+        else
+            SetLastError "Failed setting access rights for target directory \"${FILE_TRANSER_PATH}\"."
+            return "${INTERNAL_ERROR}"
+        fi
+    fi
+    
+    if [[ ${status} != "${SUCCESS}" ]]; then
+        SetLastError "Failed preparing target directory \"${FILE_TRANSER_PATH}\"."
+        return "${INTERNAL_ERROR}"
+    fi
+    echo -n "$output"
+    return "${status}"
+}
+
+
+function cleanup
+{
+    local status=${INTERNAL_ERROR}
+
+    rm -rf "${FILE_TRANSER_PATH}"
+    status="$?"
+
+    if [[ ${status} != "${SUCCESS}" ]]; then
+        SetLastError "Failed Removing target directory \"${FILE_TRANSER_PATH}\"."
+        return "${INTERNAL_ERROR}"
+    fi
+    return ${status}
+}
+
+function get_json_output {
+    local status=${SUCCESS}
+
+    local json_output=()
+
+    # get values
+    if [[ ${status} == "${SUCCESS}" ]] && [[ -n "$print_file_transfer_path" ]]; then
+        json_output+=("\"FileTransferPath\": \"$(file_transfer_path)\"")
+        status=$?
+    fi
+    if [[ ${status} == "${SUCCESS}" ]] && [[ -n "$print_free_capacity" ]]; then
+        json_output+=("\"FreeCapacity\": $(free_capacity)")
+        status=$?
+    fi
+    if [[ ${status} == "${SUCCESS}" ]] && [[ -n "$print_available_capacity" ]]; then
+        json_output+=("\"AvailableCapacity\": $(available_capacity)")
+        status=$?
+    fi
+
+    # format output
+    if [[ ${status} == "${SUCCESS}" ]]; then
+        json_output="$(printf "%s\n" "${json_output[@]}" | paste -sd "," - | sed -e 's#/#\\/#g')"
+        status=$?
+    fi
+    
+    if [[ ${status} != "${SUCCESS}" ]]; then
+        return "${INTERNAL_ERROR}"
+    fi
+    echo -n "{${json_output}}"
+    return ${status}
+}
+
+function get_text_output {
+    local status=${SUCCESS}
+
+    local text_output=()
+
+    # get values
+    if [[ ${status} == "${SUCCESS}" ]] && [[ -n "$print_file_transfer_path" ]]; then
+        text_output+=("FileTransferPath=$(file_transfer_path)")
+        status=$?
+    fi
+    if [[ ${status} == "${SUCCESS}" ]] && [[ -n "$print_free_capacity" ]]; then
+        text_output+=("FreeCapacity=$(free_capacity)")
+        status=$?
+    fi
+    if [[ ${status} == "${SUCCESS}" ]] && [[ -n "$print_available_capacity" ]]; then
+        text_output+=("AvailableCapacity=$(available_capacity)")
+        status=$?
+    fi
+
+    # format output
+    if [[ ${status} == "${SUCCESS}" ]]; then
+        text_output="$(printf "%s\n" "${text_output[@]}" | paste -sd "\n" -)"
+        status=$?
+    fi
+
+    if [[ ${status} != "${SUCCESS}" ]]; then
+        return "${INTERNAL_ERROR}"
+    fi
+    echo -n "${text_output}"
+    return ${status}
+}
+
+
+function get_info
+{
+    local status=${SUCCESS}
+    local output=""
+
+    if [[ -n "$json" ]]; then
+        output=$(get_json_output)
+        status=$?
+    fi
+
+    if [[ ${status} == "${SUCCESS}" ]] && [[ -n "$text" ]]; then
+        local text_output=$(get_text_output)
+        status=$?
+        if [[ ${status} == "${SUCCESS}" ]]; then
+            output=${output}"${text_output}"
+            status=$?
+        fi
+    fi
+
+    if [[ ${status} != "${SUCCESS}" ]]; then
+        return ${INTERNAL_ERROR}
+    fi
+    echo -n "${output}"
+    return ${status}
+}
+
+
+function parse_cmd_line
+{
+    while [[ $# -ne 0 && $status == "$SUCCESS" ]]; do
+        case "$1" in
+            -h)
+                print_usage
+                exit 0
+                ;;
+            --help)
+                print_usage
+                exit 0
+                ;;
+            -q)
+                quiet="--quiet"
+                ;;
+            --quiet)
+                quiet="--quiet"
+                ;;
+            -j)
+                json="--json"
+                ;;
+            --json)
+                json="--json"
+                ;;
+            -t)
+                text="--text"
+                ;;
+            --text)
+                text="--text"
+                ;;
+            -f)
+                print_free_capacity="--print-free-capacity"
+                ;;
+            --print-free-capacity)
+                print_free_capacity="--print-free-capacity"
+                ;;
+            -a)
+                print_available_capacity="--print-available-capacity"
+                ;;
+            --print-available-capacity)
+                print_available_capacity="--print-available-capacity"
+                ;;
+            -d)
+                print_file_transfer_path="--print-mount-point"
+                ;;
+            --print-file-transfer-path)
+                print_file_transfer_path="--print-mount-point"
+                ;;
+            -x)
+                uri_encoding="--extract-from-uri-encoding"
+                ;;
+            --extract-from-uri-encoding)
+                uri_encoding="--extract-from-uri-encoding"
+                ;;
+            -p)
+                operation="prepare"
+                ;;
+            --prepare)
+                operation="prepare"
+                ;;
+            -c)
+                operation="cleanup"
+                ;;
+            --cleanup)
+                operation="cleanup"
+                ;;
+        esac
+        shift 1
+    done
+    
+    return $status
+}
+
+
+#-------------- main-program ------------------------#
+
+quiet=""
+text=""
+json=""
+operation=""
+print_free_capacity=""
+print_available_capacity=""
+print_file_transfer_path=""
+uri_encoding=""
+
+# load general definitions and functions
+if [ ! -f "/etc/config-tools/config_tool_lib" ]; then
+    print_dbg "config_tool_lib missing"
+    exit 255
+fi
+
+. "/etc/config-tools/config_tool_lib"
+
+status=$SUCCESS
+
+if [[ $# -lt 1 ]]; then
+    print_usage
+    exit 0
+fi
+
+parse_cmd_line "$@"
+
+
+if [[ "$operation" == "prepare" ]]; then
+    prepare
+    status=$?
+elif [[ "$operation" == "cleanup" ]]; then
+    cleanup
+    status=$?
+else
+    get_info
+    status=$?
+fi
+
+
+exit $status

@@ -53,6 +53,21 @@ config ELREST_CUSTOM_CC100_UDEV_RULES_INSTALL
 	help
 	  This installs elrest custom CC100 udev rules to /etc/udev/rules.d.
 
+config CC100OVERSAMPLINGFACTOR
+	bool
+	default n
+	prompt "install custom CC100, oversampling init.d files"
+	help
+	  This installs elrest custom CC100 oversampling factor settings.
+
+config CC100_M4_FIRMWARE_LOAD
+	bool
+	default n
+	prompt "install custom CC100, init.d files for cortex M4 firmware loading"
+	help
+	  This installs elrest custom CC100 init files for cortex M4 firmware loading.
+
+
 #config ELREST_CUSTOM_TIME_LOCALE_CONFIG_INSTALL
 #	bool
 #	default n

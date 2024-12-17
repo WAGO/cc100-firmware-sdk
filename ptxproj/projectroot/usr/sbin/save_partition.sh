@@ -21,14 +21,21 @@ statusFile="${4:-}"
 # that shall be excluded from the tar
 GenIgnoredFileList()
 {
-  # /home is ignored because it's backed up separately via "codesys" command
-  IGNORED_DIRS="./lost+found ./log/* ./proc/* ./sys/* ./home/* ./media/* ./mnt/* ./tmp/* ./run/* ./var/run/* ./var/log/* ./var/lock/* ./var/tmp/*"
+  IGNORED_DIRS=("./lost+found" "./log/*" "./proc/*" "./sys/*" "./media/*" "./mnt/*" "./tmp/*" "./run/*" "./var/run/*" "./var/log/*" "./var/lock/*" "./var/tmp/*")
+  if [[ "$(/etc/config-tools/get_typelabel_value order)" == 750-83?? ]] \
+     || [[ "$(/etc/config-tools/get_typelabel_value order)" == 762-34?? ]]; then
+     # /home is ignored because the modeLabel only allows backups of rootfs and home is a separate partition
+    IGNORED_DIRS+=("./home")
+  else
+    # /home is ignored because it's backed up separately via "codesys" command
+    IGNORED_DIRS+=("./home/*")
+  fi
   PRESERVED_DEV_FILES="dev/console\\|dev/zero\\|dev/null"
-  test -z "$statusFile" || IGNORED_DIRS="${IGNORED_DIRS} ${statusFile} ${statusFile}.tmp"
+  test -z "$statusFile" || IGNORED_DIRS+=("${statusFile}" "${statusFile}.tmp")
 
   (
     # copy ignored patterns to the list (everything we ignore except /dev)
-    echo "$IGNORED_DIRS"
+    echo "${IGNORED_DIRS[*]}"
     # copy /dev/* to the list
     cd / && find ./dev/ -mindepth 1 -maxdepth 1
  ) | sed "\,$PRESERVED_DEV_FILES,d; s/ /\\n/g"
@@ -39,6 +46,11 @@ totalSize()
 {
   case "${modeLabel}" in
   codesys)
+    if [[ "$(/etc/config-tools/get_typelabel_value order)" == 750-83?? ]] \
+       || [[ "$(/etc/config-tools/get_typelabel_value order)" == 762-34?? ]]; then
+      echo "1"
+      return;
+    fi
     echo "$((1024 * $(du -xs /home | awk '{print $1}') ))"
     ;;
   rootfs)
@@ -57,6 +69,10 @@ backupData()
   # exec 2>/dev/null
   case "${modeLabel}" in
     codesys)
+      if [[ "$(/etc/config-tools/get_typelabel_value order)" == 750-83?? ]] \
+         || [[ "$(/etc/config-tools/get_typelabel_value order)" == 762-34?? ]]; then
+        return;
+      fi
       cp /etc/codesys3.d/CODESYSControl_User.cfg /home/codesys/CODESYSControl_User.cfg 2>/dev/null ||:
       TAR_OPTIONS="-C /home --exclude=./user/bacnet/cert/* --exclude=./docker --exclude=./wago-docker ./"
       if [[ "enabled" == "$(/etc/config-tools/get_runtime_config homedir-on-sdcard)" ]]; then
